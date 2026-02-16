@@ -65,179 +65,6 @@ const INHERITED_CSS_PROPS = new Set([
   'text-indent', 'word-spacing',
 ]);
 
-const INHERITED_TEXT_DESCENDANT_SELECTOR = ':is(p, li, h1, h2, h3, h4, h5, h6, blockquote, a, span, code, mark)';
-
-// When users set document-level style variables (--- style text/bg/accent/etc),
-// emit user-layer selector overrides so these globals can win over hardcoded
-// theme/preset rawCss colors across all kits.
-const GLOBAL_TOKEN_OVERRIDE_RULES: Record<string, string> = {
-  text: `.mkly-document,
-.mkly-document :is(p, li, h1, h2, h3, h4, h5, h6),
-.mkly-core-heading,
-.mkly-core-text,
-.mkly-core-code pre,
-.mkly-core-list,
-.mkly-core-section__title,
-.mkly-core-card__body h2,
-.mkly-core-header__title,
-.mkly-newsletter-intro,
-.mkly-newsletter-category__title,
-.mkly-newsletter-quickHits__title,
-.mkly-newsletter-tools__title,
-.mkly-newsletter-community__author,
-.mkly-newsletter-personalNote,
-.mkly-newsletter-poll__question,
-.mkly-newsletter-recommendations__title,
-.mkly-newsletter-custom__title {
-  color: var(--mkly-text);
-}`,
-  muted: `.mkly-document blockquote,
-.mkly-core-quote,
-.mkly-core-quote__author,
-.mkly-core-footer,
-.mkly-core-footer a,
-.mkly-newsletter-featured__author,
-.mkly-newsletter-community__quote,
-.mkly-newsletter-sponsor__badge,
-.mkly-newsletter-outro,
-.mkly-newsletter-item__meta {
-  color: var(--mkly-muted);
-}`,
-  accent: `.mkly-document a,
-.mkly-core-card__link,
-.mkly-newsletter-featured__source,
-.mkly-newsletter-featured__link,
-.mkly-newsletter-item__source,
-.mkly-newsletter-item__link,
-.mkly-newsletter-quickHits a,
-.mkly-newsletter-tools a,
-.mkly-newsletter-recommendations a,
-.mkly-newsletter-sponsor__link,
-.mkly-newsletter-tipOfTheDay__title,
-.mkly-newsletter-poll__option {
-  color: var(--mkly-accent);
-}
-
-.mkly-core-button__link,
-.mkly-core-cta__button,
-.mkly-newsletter-outro__cta {
-  background: var(--mkly-accent);
-}`,
-  accentHover: `.mkly-document a:not([class]):hover,
-.mkly-core-card__link:hover,
-.mkly-newsletter-featured__link:hover,
-.mkly-newsletter-item__link:hover,
-.mkly-newsletter-sponsor__link:hover {
-  color: var(--mkly-accent-hover);
-}
-
-.mkly-core-button__link:hover,
-.mkly-core-cta__button:hover,
-.mkly-newsletter-outro__cta:hover {
-  background: var(--mkly-accent-hover);
-}`,
-  border: `.mkly-document hr,
-.mkly-document pre,
-.mkly-document th,
-.mkly-document td,
-.mkly-core-header,
-.mkly-core-footer,
-.mkly-core-section,
-.mkly-core-card,
-.mkly-core-code,
-.mkly-core-divider,
-.mkly-newsletter-featured,
-.mkly-newsletter-item,
-.mkly-newsletter-tools,
-.mkly-newsletter-recommendations,
-.mkly-newsletter-poll,
-.mkly-newsletter-sponsor,
-.mkly-newsletter-custom {
-  border-color: var(--mkly-border);
-}
-
-.mkly-core-divider {
-  background: var(--mkly-border);
-}`,
-  bg: `.mkly-document,
-.mkly-core-card,
-.mkly-newsletter-featured,
-.mkly-newsletter-item {
-  background: var(--mkly-bg);
-}`,
-  bgSubtle: `.mkly-core-hero,
-.mkly-core-code,
-.mkly-core-cta,
-.mkly-newsletter-quickHits,
-.mkly-newsletter-tools,
-.mkly-newsletter-recommendations,
-.mkly-newsletter-poll,
-.mkly-newsletter-community,
-.mkly-newsletter-custom {
-  background: var(--mkly-bg-subtle);
-}`,
-  buttonText: `.mkly-core-button__link,
-.mkly-core-cta__button,
-.mkly-newsletter-outro__cta {
-  color: var(--mkly-button-text);
-}`,
-  textAlign: `.mkly-document :is(p, li, h1, h2, h3, h4, h5, h6, blockquote),
-.mkly-core-heading,
-.mkly-core-text,
-.mkly-core-section__title,
-.mkly-core-header__title,
-.mkly-newsletter-category__title,
-.mkly-newsletter-quickHits__title,
-.mkly-newsletter-tools__title,
-.mkly-newsletter-recommendations__title,
-.mkly-newsletter-custom__title {
-  text-align: var(--mkly-text-align);
-}`,
-  fontSize: `.mkly-document {
-  font-size: var(--mkly-font-size);
-}`,
-  lineHeight: `.mkly-document :is(p, li, blockquote, td, th),
-.mkly-core-text,
-.mkly-newsletter-intro,
-.mkly-newsletter-featured p,
-.mkly-newsletter-item p,
-.mkly-newsletter-quickHits li,
-.mkly-newsletter-tools p,
-.mkly-newsletter-tipOfTheDay p,
-.mkly-newsletter-personalNote,
-.mkly-newsletter-recommendations li {
-  line-height: var(--mkly-line-height);
-}`,
-  fontBody: `.mkly-document {
-  font-family: var(--mkly-font-body);
-}`,
-  fontHeading: `.mkly-document :is(h1, h2, h3, h4, h5, h6),
-.mkly-core-heading,
-.mkly-core-section__title,
-.mkly-core-header__title,
-.mkly-newsletter-category__title,
-.mkly-newsletter-quickHits__title,
-.mkly-newsletter-tools__title,
-.mkly-newsletter-recommendations__title,
-.mkly-newsletter-custom__title {
-  font-family: var(--mkly-font-heading);
-}`,
-  fontMono: `.mkly-document code,
-.mkly-document pre,
-.mkly-core-code pre {
-  font-family: var(--mkly-font-mono);
-}`,
-};
-
-function buildGlobalTokenOverrideCSS(variableNames: ReadonlySet<string>): string {
-  const rules: string[] = [];
-  for (const name of variableNames) {
-    const rule = GLOBAL_TOKEN_OVERRIDE_RULES[name];
-    if (rule) rules.push(rule);
-  }
-  return rules.join('\n\n');
-}
-
 /** Convert a style property key to CSS property name. */
 export function cssProperty(key: string): string {
   return STYLE_ALIASES[key] ?? (key.includes('-') ? key : toKebab(key));
@@ -245,21 +72,6 @@ export function cssProperty(key: string): string {
 
 function safeCssValue(v: string): string {
   return v.replace(/<\//gi, '<\\/');
-}
-
-function toRem(pxValue: number): string {
-  if (pxValue === 0) return '0';
-  const rem = pxValue / 16;
-  const normalized = Number.parseFloat(rem.toFixed(4)).toString();
-  return `${normalized}rem`;
-}
-
-function normalizeCssUnits(css: string): string {
-  return css.replace(/(-?\d*\.?\d+)px\b/g, (_, value: string) => {
-    const px = Number.parseFloat(value);
-    if (!Number.isFinite(px)) return `${value}px`;
-    return toRem(px);
-  });
 }
 
 /** Resolve $variable references to var(--mkly-*) */
@@ -302,18 +114,15 @@ export function resolveSelector(target: string, blockType: string, label?: strin
     return `.${base}${labelSuffix} ${tag}`;
   }
 
-  // BEM sub-element with optional pseudo.
-  // With label: descendant selector — ".block--label .block__sub"
-  // (the label modifier is on the block root, the sub-element is a child)
-  // Without label: single class — ".block__sub"
+  // BEM sub-element with optional pseudo
   const pseudoIdx = target.indexOf(':');
-  const sub = pseudoIdx !== -1 ? target.slice(0, pseudoIdx) : target;
-  const pseudo = pseudoIdx !== -1 ? target.slice(pseudoIdx) : '';
-
-  if (label) {
-    return `.${base}${labelSuffix} .${base}__${sub}${pseudo}`;
+  if (pseudoIdx !== -1) {
+    const sub = target.slice(0, pseudoIdx);
+    const pseudo = target.slice(pseudoIdx);
+    return `.${base}${labelSuffix}__${sub}${pseudo}`;
   }
-  return `.${base}__${sub}${pseudo}`;
+
+  return `.${base}${labelSuffix}__${target}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -347,7 +156,7 @@ function getIndent(line: string): number {
   let count = 0;
   for (const ch of line) {
     if (ch === ' ') count++;
-    else if (ch === '\t') count += 4;
+    else if (ch === '\t') count += 2;
     else break;
   }
   return count;
@@ -468,7 +277,6 @@ function parseIndentedToGraph(source: string): StyleGraph {
   let isRawContext = false;
   let blockBaseIndent = -1;
   let targetFromSubElement = false;
-  let subElementIndent = -1;
 
   function flushRule() {
     if (currentBlock && Object.keys(currentProps).length > 0) {
@@ -492,7 +300,6 @@ function parseIndentedToGraph(source: string): StyleGraph {
       isRawContext = false;
       blockBaseIndent = -1;
       targetFromSubElement = false;
-      subElementIndent = -1;
 
       // Variable declaration: "key: value" (must have space after colon to
       // distinguish from pseudo selectors like "card:hover")
@@ -580,7 +387,6 @@ function parseIndentedToGraph(source: string): StyleGraph {
       flushRule();
       currentTarget = `>${tagPseudoMatch[1]}${tagPseudoMatch[2]}`;
       targetFromSubElement = true;
-      subElementIndent = indent;
       continue;
     }
 
@@ -590,7 +396,6 @@ function parseIndentedToGraph(source: string): StyleGraph {
       flushRule();
       currentTarget = `>${tagMatch[1]}`;
       targetFromSubElement = true;
-      subElementIndent = indent;
       continue;
     }
 
@@ -600,7 +405,6 @@ function parseIndentedToGraph(source: string): StyleGraph {
       flushRule();
       currentTarget = `${subPseudoMatch[1]}${subPseudoMatch[2]}`;
       targetFromSubElement = true;
-      subElementIndent = indent;
       continue;
     }
 
@@ -610,7 +414,6 @@ function parseIndentedToGraph(source: string): StyleGraph {
       flushRule();
       currentTarget = subMatch[1] === 'self' ? 'self' : subMatch[1];
       targetFromSubElement = true;
-      subElementIndent = indent;
       continue;
     }
 
@@ -620,19 +423,17 @@ function parseIndentedToGraph(source: string): StyleGraph {
       flushRule();
       currentTarget = `self${pseudoMatch[1]}`;
       targetFromSubElement = true;
-      subElementIndent = indent;
       continue;
     }
 
-    // Property at the sub-element's indent level or shallower resets target to 'self'
+    // Property at the block's base indent resets target to 'self'
     // (e.g. `padding: 24px` after `.source` properties).
     // Only resets when the target was set by a sub-element/pseudo inside
     // the block — NOT when the target was set at indent 0 (e.g. card:hover).
-    if (indent <= subElementIndent && currentTarget !== 'self' && targetFromSubElement) {
+    if (indent <= blockBaseIndent && currentTarget !== 'self' && targetFromSubElement) {
       flushRule();
       currentTarget = 'self';
       targetFromSubElement = false;
-      subElementIndent = -1;
     }
 
     // Property inside a rule
@@ -715,19 +516,14 @@ export function serializeStyleGraph(graph: StyleGraph): string {
   for (const [selectorKey, blockRules] of grouped) {
     if (lines.length > 0) lines.push('');
 
-    // Merge all "self" rules (block root properties) — the parser may produce
-    // multiple self rules when sub-element sections interleave with self properties.
-    const selfRules = blockRules.filter(r => r.target === 'self');
+    // Find the "self" rule (block root properties)
+    const selfRule = blockRules.find(r => r.target === 'self');
     const otherRules = blockRules.filter(r => r.target !== 'self');
-    const mergedSelfProps: Record<string, string> = {};
-    for (const r of selfRules) {
-      Object.assign(mergedSelfProps, r.properties);
-    }
 
     lines.push(selectorKey);
 
-    if (Object.keys(mergedSelfProps).length > 0) {
-      for (const [prop, value] of Object.entries(mergedSelfProps)) {
+    if (selfRule) {
+      for (const [prop, value] of Object.entries(selfRule.properties)) {
         lines.push(`  ${prop}: ${value}`);
       }
     }
@@ -805,25 +601,18 @@ function parseTarget(target: string): { sub: string | null; pseudo: string | nul
  */
 export function compileStyleGraphToCSS(graph: StyleGraph): string {
   const cssLines: string[] = [];
-  const variableNames = new Set<string>();
 
   // Variables → .mkly-document { --mkly-*: value }
   if (graph.variables.length > 0) {
     const varLines: string[] = [];
     for (const v of graph.variables) {
-      variableNames.add(v.name);
       if (v.name in VARIABLE_TO_CSS) {
-        varLines.push(`  ${VARIABLE_TO_CSS[v.name]}: ${resolveValue(v.value)};`);
+        varLines.push(`  ${VARIABLE_TO_CSS[v.name]}: ${v.value};`);
       } else {
-        varLines.push(`  ${resolveVariableName(v.name)}: ${resolveValue(v.value)};`);
+        varLines.push(`  ${cssProperty(v.name)}: ${resolveValue(v.value)};`);
       }
     }
     cssLines.push(`.mkly-document {\n${varLines.join('\n')}\n}`);
-
-    const globalOverrideCSS = buildGlobalTokenOverrideCSS(variableNames);
-    if (globalOverrideCSS) {
-      cssLines.push(globalOverrideCSS);
-    }
   }
 
   // Rules → CSS selectors
@@ -841,36 +630,50 @@ export function compileStyleGraphToCSS(graph: StyleGraph): string {
 
     const selector = resolveSelector(rule.target, rule.blockType, rule.label);
     const isSubElement = rule.target !== 'self' && !rule.target.startsWith('self:');
+    const isTagTarget = rule.target.startsWith('>');
 
-    const props = Object.entries(rule.properties)
+    // Expand text-align on BEM sub-elements to margin values (block images need margin for alignment).
+    // Tag targets (">p", ">h1") keep text-align as-is since they target content elements directly.
+    const expandedProps: Record<string, string> = {};
+    for (const [k, v] of Object.entries(rule.properties)) {
+      if (k === 'text-align' && isSubElement && !isTagTarget) {
+        switch (v) {
+          case 'center':
+            expandedProps['margin-left'] = 'auto';
+            expandedProps['margin-right'] = 'auto';
+            break;
+          case 'right':
+            expandedProps['margin-left'] = 'auto';
+            expandedProps['margin-right'] = '0';
+            break;
+          case 'left':
+            expandedProps['margin-left'] = '0';
+            expandedProps['margin-right'] = 'auto';
+            break;
+          default:
+            expandedProps[k] = v;
+        }
+      } else {
+        expandedProps[k] = v;
+      }
+    }
+
+    const props = Object.entries(expandedProps)
       .map(([k, v]) => `  ${cssProperty(k)}: ${resolveValue(v)};`)
       .join('\n');
     if (props) {
       cssLines.push(`${selector} {\n${props}\n}`);
 
-      // For all non-self targets: propagate inherited properties to child text
+      // For BEM sub-element targets: propagate inherited properties to child text
       // elements so they override theme rawCss rules like `.mkly-document p`.
-      if (isSubElement) {
-        const inheritedProps = Object.entries(rule.properties)
+      // Skip for tag targets — they already target specific tags directly.
+      if (isSubElement && !isTagTarget) {
+        const inheritedProps = Object.entries(expandedProps)
           .filter(([k]) => INHERITED_CSS_PROPS.has(cssProperty(k)))
           .map(([k, v]) => `  ${cssProperty(k)}: ${resolveValue(v)};`)
           .join('\n');
         if (inheritedProps) {
-          cssLines.push(`${selector} ${INHERITED_TEXT_DESCENDANT_SELECTOR} {\n${inheritedProps}\n}`);
-        }
-      }
-
-      // For self rules with text-align, propagate centering/alignment to block-level
-      // img children via auto margins. Images have display:block (for baseline gap fix),
-      // so text-align on the parent has no effect — they need margin: auto instead.
-      if ((rule.target === 'self' || rule.target.startsWith('self:')) && rule.properties['text-align']) {
-        const align = rule.properties['text-align'];
-        if (align === 'center') {
-          cssLines.push(`${selector} img {\n  margin-left: auto;\n  margin-right: auto;\n}`);
-        } else if (align === 'right') {
-          cssLines.push(`${selector} img {\n  margin-left: auto;\n  margin-right: 0;\n}`);
-        } else if (align === 'left') {
-          cssLines.push(`${selector} img {\n  margin-left: 0;\n  margin-right: auto;\n}`);
+          cssLines.push(`${selector} :is(p, li, h1, h2, h3, h4, h5, h6, blockquote) {\n${inheritedProps}\n}`);
         }
       }
     }
@@ -1019,12 +822,12 @@ export function compileLayeredCSS(
 
   // Kit layer
   const kitParts: string[] = [];
-  if (options.diagnosticCSS) kitParts.push(normalizeCssUnits(options.diagnosticCSS));
-  if (options.kitCSS && options.kitCSS.length > 0) kitParts.push(normalizeCssUnits(options.kitCSS.join('\n')));
+  if (options.diagnosticCSS) kitParts.push(options.diagnosticCSS);
+  if (options.kitCSS && options.kitCSS.length > 0) kitParts.push(options.kitCSS.join('\n'));
   if (options.kitKeyframes) {
     const kfEntries = Object.entries(options.kitKeyframes);
     if (kfEntries.length > 0) {
-      kitParts.push(normalizeCssUnits(kfEntries.map(([name, body]) => `@keyframes ${name}{${body}}`).join('\n')));
+      kitParts.push(kfEntries.map(([name, body]) => `@keyframes ${name}{${body}}`).join('\n'));
     }
   }
   if (kitParts.length > 0) {
@@ -1033,7 +836,7 @@ export function compileLayeredCSS(
 
   // Theme layer
   if (options.themeCSS && options.themeCSS.length > 0) {
-    parts.push(`@layer theme {\n${normalizeCssUnits(options.themeCSS.join('\n'))}\n}`);
+    parts.push(`@layer theme {\n${options.themeCSS.join('\n')}\n}`);
   }
 
   // Preset layer
@@ -1042,13 +845,13 @@ export function compileLayeredCSS(
   if (options.apiThemeCSS) presetParts.push(options.apiThemeCSS);
   if (options.blockContribCSS && options.blockContribCSS.length > 0) presetParts.push(...options.blockContribCSS);
   if (presetParts.length > 0) {
-    parts.push(`@layer preset {\n${normalizeCssUnits(presetParts.join('\n'))}\n}`);
+    parts.push(`@layer preset {\n${presetParts.join('\n')}\n}`);
   }
 
   // User layer (from StyleGraph — document --- style blocks)
   const userCSS = compileStyleGraphToCSS(graph);
   if (userCSS) {
-    parts.push(`@layer user {\n${normalizeCssUnits(userCSS)}\n}`);
+    parts.push(`@layer user {\n${userCSS}\n}`);
   }
 
   return parts.join('\n\n');
@@ -1086,29 +889,25 @@ export function resolveForEmail(value: string, variables: Record<string, string>
     return variables[name] ?? value;
   });
 
-  // Resolve var(--mkly-*) references (handles nested var() via loop)
-  let prev = '';
-  while (prev !== resolved && resolved.includes('var(')) {
-    prev = resolved;
-    resolved = resolved.replace(/var\(([^()]+)\)/g, (match, varExpr: string) => {
-      const commaIdx = varExpr.indexOf(',');
-      const varName = commaIdx !== -1 ? varExpr.slice(0, commaIdx).trim() : varExpr.trim();
-      const fallback = commaIdx !== -1 ? varExpr.slice(commaIdx + 1).trim() : undefined;
+  // Resolve var(--mkly-*) references
+  resolved = resolved.replace(/var\(([^)]+)\)/g, (match, varExpr: string) => {
+    const parts = varExpr.split(',').map(p => p.trim());
+    const varName = parts[0];
+    const fallback = parts.length > 1 ? parts.slice(1).join(',').trim() : undefined;
 
-      // Try reverse mapping
-      const mklyKey = CSS_TO_VARIABLE[varName];
-      if (mklyKey && variables[mklyKey] !== undefined) return variables[mklyKey];
+    // Try reverse mapping
+    const mklyKey = CSS_TO_VARIABLE[varName];
+    if (mklyKey && variables[mklyKey] !== undefined) return variables[mklyKey];
 
-      // Try direct variable name (strip --mkly- prefix)
-      const stripped = varName.replace(/^--mkly-/, '').replace(/-([a-z])/g, (_, c) => c.toUpperCase());
-      if (variables[stripped] !== undefined) return variables[stripped];
+    // Try direct variable name (strip --mkly- prefix)
+    const stripped = varName.replace(/^--mkly-/, '').replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+    if (variables[stripped] !== undefined) return variables[stripped];
 
-      // Use CSS fallback value if present
-      if (fallback !== undefined) return fallback;
+    // Use CSS fallback value if present
+    if (fallback !== undefined) return fallback;
 
-      return match;
-    });
-  }
+    return match;
+  });
 
   return resolved;
 }
