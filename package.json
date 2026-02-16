@@ -1,0 +1,30 @@
+{
+  "name": "@mklyml/core",
+  "version": "0.1.2",
+  "license": "Apache-2.0",
+  "description": "A human-readable, AI-friendly markup language that compiles to HTML",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup",
+    "prepublishOnly": "bun run build",
+    "typecheck": "bunx tsc --noEmit",
+    "test": "bun test"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "tsup": "8.5.1",
+    "typescript": "5.8.2"
+  },
+  "dependencies": {
+    "zod": "4.3.6"
+  }
+}
