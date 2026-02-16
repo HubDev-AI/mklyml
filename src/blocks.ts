@@ -199,7 +199,7 @@ const section: BlockDefinition = {
   },
   styleHints: {
     self: ['text-align', 'padding', 'margin', 'background', 'border-radius', 'border-width', 'border-style', 'border-color', 'gap', 'opacity', 'box-shadow', 'overflow'],
-    title: ['color', 'font-family', 'font-size', 'font-weight', 'margin', 'padding', 'line-height', 'border-width', 'border-style'],
+    title: ['color', 'font-family', 'font-size', 'font-weight', 'margin', 'padding', 'line-height', 'border-width', 'border-style', 'border-color'],
   },
   contentHints: { contentChildren: true },
   compile: (block) => {
@@ -243,7 +243,7 @@ const list: BlockDefinition = {
   name: 'list',
   contentMode: 'text',
   styleHints: {
-    self: ['text-align', 'color', 'font-family', 'font-size', 'line-height', 'padding', 'margin', 'background', 'border-radius', 'border-width', 'border-style', 'border-color', 'opacity'],
+    self: ['text-align', 'color', 'font-family', 'font-size', 'font-style', 'line-height', 'padding', 'margin', 'background', 'border-radius', 'border-width', 'border-style', 'border-color', 'opacity', 'box-shadow'],
   },
   contentHints: { contentBody: true },
   compile: (block) => `<div class="${cls(block)}">${md(block)}</div>`,
@@ -259,9 +259,9 @@ const header: BlockDefinition = {
   },
   styleHints: {
     self: ['text-align', 'padding', 'margin', 'background', 'border-radius', 'border-width', 'border-style', 'border-color', 'opacity', 'box-shadow'],
-    logo: ['text-align', 'max-width', 'height', 'margin', 'padding', 'border-radius', 'opacity'],
+    logo: ['text-align', 'width', 'max-width', 'height', 'margin', 'padding', 'border-radius', 'opacity'],
     title: ['color', 'font-family', 'font-size', 'font-weight', 'margin', 'padding', 'line-height'],
-    subtitle: ['color', 'font-family', 'font-size', 'font-weight', 'margin', 'padding', 'line-height'],
+    subtitle: ['color', 'font-family', 'font-size', 'font-weight', 'font-style', 'margin', 'padding', 'line-height'],
   },
   compile: (block) => {
     const logo = prop(block, 'logo');
@@ -284,7 +284,7 @@ const footer: BlockDefinition = {
   name: 'footer',
   contentMode: 'mixed',
   styleHints: {
-    self: ['text-align', 'color', 'font-family', 'font-size', 'line-height', 'padding', 'margin', 'background', 'border-radius', 'border-width', 'border-style', 'border-color', 'opacity'],
+    self: ['text-align', 'color', 'font-family', 'font-size', 'font-style', 'line-height', 'padding', 'margin', 'background', 'border-radius', 'border-width', 'border-style', 'border-color', 'opacity', 'box-shadow'],
   },
   contentHints: { contentBody: true },
   compile: (block) => `<footer class="${cls(block)}">${md(block)}</footer>`,
