@@ -37,19 +37,19 @@ export function htmlToMarkdown(html: string): string {
   // Links
   text = text.replace(/<a\s+href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/gi, '[$2]($1)');
 
-  // Headings
-  text = text.replace(/<h1[^>]*>([\s\S]*?)<\/h1>/gi, '# $1');
-  text = text.replace(/<h2[^>]*>([\s\S]*?)<\/h2>/gi, '## $1');
-  text = text.replace(/<h3[^>]*>([\s\S]*?)<\/h3>/gi, '### $1');
-  text = text.replace(/<h4[^>]*>([\s\S]*?)<\/h4>/gi, '#### $1');
-  text = text.replace(/<h5[^>]*>([\s\S]*?)<\/h5>/gi, '##### $1');
-  text = text.replace(/<h6[^>]*>([\s\S]*?)<\/h6>/gi, '###### $1');
+  // Headings — preserve {.className} annotations from class attributes
+  text = text.replace(/<h1([^>]*)>([\s\S]*?)<\/h1>/gi, (_, a, c) => `# ${c}${classAnnotation(a)}`);
+  text = text.replace(/<h2([^>]*)>([\s\S]*?)<\/h2>/gi, (_, a, c) => `## ${c}${classAnnotation(a)}`);
+  text = text.replace(/<h3([^>]*)>([\s\S]*?)<\/h3>/gi, (_, a, c) => `### ${c}${classAnnotation(a)}`);
+  text = text.replace(/<h4([^>]*)>([\s\S]*?)<\/h4>/gi, (_, a, c) => `#### ${c}${classAnnotation(a)}`);
+  text = text.replace(/<h5([^>]*)>([\s\S]*?)<\/h5>/gi, (_, a, c) => `##### ${c}${classAnnotation(a)}`);
+  text = text.replace(/<h6([^>]*)>([\s\S]*?)<\/h6>/gi, (_, a, c) => `###### ${c}${classAnnotation(a)}`);
 
-  // List items
-  text = text.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, '- $1');
+  // List items — preserve {.className} annotations
+  text = text.replace(/<li([^>]*)>([\s\S]*?)<\/li>/gi, (_, a, c) => `- ${c}${classAnnotation(a)}`);
 
-  // Paragraphs — replace with content + newline
-  text = text.replace(/<p[^>]*>([\s\S]*?)<\/p>/gi, '$1\n');
+  // Paragraphs — preserve {.className} annotations
+  text = text.replace(/<p([^>]*)>([\s\S]*?)<\/p>/gi, (_, a, c) => `${c}${classAnnotation(a)}\n`);
 
   // Line breaks
   text = text.replace(/<br\s*\/?>/gi, '\n');
@@ -70,6 +70,14 @@ export function htmlToMarkdown(html: string): string {
   text = text.trim();
 
   return text;
+}
+
+/** Extract style class (s1, s2, ...) from tag attributes and return {.className} annotation. */
+function classAnnotation(attrs: string): string {
+  const m = attrs.match(/class="([^"]*)"/);
+  if (!m) return '';
+  const styleClass = m[1].split(/\s+/).find(c => /^s\d+$/.test(c));
+  return styleClass ? ` {.${styleClass}}` : '';
 }
 
 function cssToMklyInline(styleString: string): string {
