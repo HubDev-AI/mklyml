@@ -140,8 +140,8 @@ const PSEUDO_RE = /^(::?\w[\w-]*)$/;
 const SUB_PSEUDO_RE = /^\.([\w][\w-]*)(::?\w[\w-]*)$/;
 // Tag descendant target: ">p", ">h1" — generates descendant CSS selector
 const TAG_TARGET_RE = /^>([\w-]+)$/;
-// Tag descendant + pseudo: ">p:hover", ">a:visited"
-const TAG_PSEUDO_RE = /^>([\w-]+)(::?\w[\w-]*)$/;
+// Tag descendant + pseudo: ">p:hover", ">a:visited", ">p:nth-of-type(2)"
+const TAG_PSEUDO_RE = /^>([\w-]+)(::?[\w-]+(?:\([^)]*\))?)$/;
 // Label selector: requires kit prefix — "core/card:hero" (not "card:hover")
 const LABEL_SELECTOR_RE = /^([\w]+\/[\w]+):(\w+)$/;
 
