@@ -12,6 +12,16 @@ export function escapeHtml(s: string): string {
 
 const OL_RE = /^(\d+)[.)]\s+(.+)$/;
 
+/** Match {.className} attribute annotation at end of a line. */
+const ATTR_CLASS_RE = /\s*\{\.([\w][\w-]*)\}\s*$/;
+
+/** Extract {.className} from end of text, returning clean text + optional class attribute string. */
+function extractClassAttr(text: string): { clean: string; classAttr: string } {
+  const m = text.match(ATTR_CLASS_RE);
+  if (!m) return { clean: text, classAttr: '' };
+  return { clean: text.slice(0, m.index!), classAttr: ` class="${m[1]}"` };
+}
+
 export function markdownToHtml(content: string, lineMap?: number[]): string {
   if (!content) return '';
 
@@ -43,24 +53,30 @@ export function markdownToHtml(content: string, lineMap?: number[]): string {
 
     if (t.startsWith('### ')) {
       closeList();
-      result.push(`<h3${la(idx)}>${inlineFormat(t.slice(4))}</h3>`);
+      const { clean, classAttr } = extractClassAttr(t.slice(4));
+      result.push(`<h3${la(idx)}${classAttr}>${inlineFormat(clean)}</h3>`);
     } else if (t.startsWith('## ')) {
       closeList();
-      result.push(`<h2${la(idx)}>${inlineFormat(t.slice(3))}</h2>`);
+      const { clean, classAttr } = extractClassAttr(t.slice(3));
+      result.push(`<h2${la(idx)}${classAttr}>${inlineFormat(clean)}</h2>`);
     } else if (t.startsWith('# ')) {
       closeList();
-      result.push(`<h1${la(idx)}>${inlineFormat(t.slice(2))}</h1>`);
+      const { clean, classAttr } = extractClassAttr(t.slice(2));
+      result.push(`<h1${la(idx)}${classAttr}>${inlineFormat(clean)}</h1>`);
     } else if (t.startsWith('- ')) {
       if (listType !== 'ul') { closeList(); result.push('<ul>'); listType = 'ul'; }
-      result.push(`<li${la(idx)}>${inlineFormat(t.slice(2))}</li>`);
+      const { clean, classAttr } = extractClassAttr(t.slice(2));
+      result.push(`<li${la(idx)}${classAttr}>${inlineFormat(clean)}</li>`);
     } else {
       const olMatch = t.match(OL_RE);
       if (olMatch) {
         if (listType !== 'ol') { closeList(); result.push('<ol>'); listType = 'ol'; }
-        result.push(`<li${la(idx)}>${inlineFormat(olMatch[2])}</li>`);
+        const { clean, classAttr } = extractClassAttr(olMatch[2]);
+        result.push(`<li${la(idx)}${classAttr}>${inlineFormat(clean)}</li>`);
       } else {
         closeList();
-        result.push(`<p${la(idx)}>${inlineFormat(t)}</p>`);
+        const { clean, classAttr } = extractClassAttr(t);
+        result.push(`<p${la(idx)}${classAttr}>${inlineFormat(clean)}</p>`);
       }
     }
   }

@@ -139,9 +139,11 @@ const PSEUDO_RE = /^(::?\w[\w-]*)$/;
 // Combined sub-element + pseudo: ".img:hover", ".img::before"
 const SUB_PSEUDO_RE = /^\.([\w][\w-]*)(::?\w[\w-]*)$/;
 // Tag descendant target: ">p", ">h1" — generates descendant CSS selector
-const TAG_TARGET_RE = /^>([\w-]+)$/;
-// Tag descendant + pseudo: ">p:hover", ">a:visited"
-const TAG_PSEUDO_RE = /^>([\w-]+)(::?\w[\w-]*)$/;
+// Also matches class descendant: ">.s1" — generates ".mkly-block .s1"
+const TAG_TARGET_RE = /^>(\.?[\w][\w-]*)$/;
+// Tag descendant + pseudo: ">p:hover", ">a:visited", ">p:nth-of-type(2)"
+// Also matches class + pseudo: ">.s1:hover"
+const TAG_PSEUDO_RE = /^>(\.?[\w][\w-]*)(::?[\w-]+(?:\([^)]*\))?)$/;
 // Label selector: requires kit prefix — "core/card:hero" (not "card:hover")
 const LABEL_SELECTOR_RE = /^([\w]+\/[\w]+):(\w+)$/;
 
