@@ -108,7 +108,13 @@ export function resolveSelector(target: string, blockType: string, label?: strin
     return `.${base}${labelSuffix}${target.slice(4)}`;
   }
 
-  // sub-element with optional pseudo
+  // Tag descendant target: ">p" → ".mkly-block p", ">p:hover" → ".mkly-block p:hover"
+  if (target.startsWith('>')) {
+    const tag = target.slice(1);
+    return `.${base}${labelSuffix} ${tag}`;
+  }
+
+  // BEM sub-element with optional pseudo
   const pseudoIdx = target.indexOf(':');
   if (pseudoIdx !== -1) {
     const sub = target.slice(0, pseudoIdx);
@@ -132,6 +138,12 @@ const SUB_ELEMENT_RE = /^\.([\w][\w-]*)$/;
 const PSEUDO_RE = /^(::?\w[\w-]*)$/;
 // Combined sub-element + pseudo: ".img:hover", ".img::before"
 const SUB_PSEUDO_RE = /^\.([\w][\w-]*)(::?\w[\w-]*)$/;
+// Tag descendant target: ">p", ">h1" — generates descendant CSS selector
+// Also matches class descendant: ">.s1" — generates ".mkly-block .s1"
+const TAG_TARGET_RE = /^>(\.?[\w][\w-]*)$/;
+// Tag descendant + pseudo: ">p:hover", ">a:visited", ">p:nth-of-type(2)"
+// Also matches class + pseudo: ">.s1:hover"
+const TAG_PSEUDO_RE = /^>(\.?[\w][\w-]*)(::?[\w-]+(?:\([^)]*\))?)$/;
 // Label selector: requires kit prefix — "core/card:hero" (not "card:hover")
 const LABEL_SELECTOR_RE = /^([\w]+\/[\w]+):(\w+)$/;
 
@@ -369,6 +381,24 @@ function parseIndentedToGraph(source: string): StyleGraph {
       blockBaseIndent = indent;
     }
 
+    // Tag descendant + pseudo: >p:hover, >a:visited
+    const tagPseudoMatch = trimmed.match(TAG_PSEUDO_RE);
+    if (tagPseudoMatch) {
+      flushRule();
+      currentTarget = `>${tagPseudoMatch[1]}${tagPseudoMatch[2]}`;
+      targetFromSubElement = true;
+      continue;
+    }
+
+    // Tag descendant: >p, >h1
+    const tagMatch = trimmed.match(TAG_TARGET_RE);
+    if (tagMatch) {
+      flushRule();
+      currentTarget = `>${tagMatch[1]}`;
+      targetFromSubElement = true;
+      continue;
+    }
+
     // Combined sub-element + pseudo: .img:hover, .img::before
     const subPseudoMatch = trimmed.match(SUB_PSEUDO_RE);
     if (subPseudoMatch) {
@@ -499,15 +529,21 @@ export function serializeStyleGraph(graph: StyleGraph): string {
     }
 
     for (const rule of otherRules) {
-      const { sub, pseudo } = parseTarget(rule.target);
+      const { sub, pseudo, isTag } = parseTarget(rule.target);
       if (pseudo && !sub) {
         // Pseudo on self: :hover
         lines.push(`  ${pseudo}`);
+      } else if (isTag && sub && !pseudo) {
+        // Tag descendant: >p
+        lines.push(`  >${sub}`);
+      } else if (isTag && sub && pseudo) {
+        // Tag descendant with pseudo: >p:hover
+        lines.push(`  >${sub}${pseudo}`);
       } else if (sub && !pseudo) {
-        // Sub-element: .img
+        // BEM sub-element: .img
         lines.push(`  .${sub}`);
       } else if (sub && pseudo) {
-        // Sub-element with pseudo: .img:hover — emit as .sub then :pseudo
+        // BEM sub-element with pseudo: .img:hover
         lines.push(`  .${sub}${pseudo}`);
       }
 
@@ -529,12 +565,22 @@ export function serializeStyleGraph(graph: StyleGraph): string {
   return lines.join('\n');
 }
 
-/** Parse a target like "self:hover", "img", "img:hover" into sub + pseudo parts */
-function parseTarget(target: string): { sub: string | null; pseudo: string | null } {
+/** Parse a target like "self:hover", "img", "img:hover", ">p", ">p:hover" into parts */
+function parseTarget(target: string): { sub: string | null; pseudo: string | null; isTag?: boolean } {
   if (target === 'self') return { sub: null, pseudo: null };
 
   if (target.startsWith('self:')) {
     return { sub: null, pseudo: target.slice(4) };
+  }
+
+  // Tag descendant target: ">p", ">p:hover"
+  if (target.startsWith('>')) {
+    const tag = target.slice(1);
+    const colonIdx = tag.indexOf(':');
+    if (colonIdx !== -1) {
+      return { sub: tag.slice(0, colonIdx), pseudo: tag.slice(colonIdx), isTag: true };
+    }
+    return { sub: tag, pseudo: null, isTag: true };
   }
 
   const colonIdx = target.indexOf(':');
@@ -584,11 +630,13 @@ export function compileStyleGraphToCSS(graph: StyleGraph): string {
 
     const selector = resolveSelector(rule.target, rule.blockType, rule.label);
     const isSubElement = rule.target !== 'self' && !rule.target.startsWith('self:');
+    const isTagTarget = rule.target.startsWith('>');
 
-    // Expand text-align on sub-elements to margin values (block images need margin for alignment)
+    // Expand text-align on BEM sub-elements to margin values (block images need margin for alignment).
+    // Tag targets (">p", ">h1") keep text-align as-is since they target content elements directly.
     const expandedProps: Record<string, string> = {};
     for (const [k, v] of Object.entries(rule.properties)) {
-      if (k === 'text-align' && isSubElement) {
+      if (k === 'text-align' && isSubElement && !isTagTarget) {
         switch (v) {
           case 'center':
             expandedProps['margin-left'] = 'auto';
@@ -616,9 +664,10 @@ export function compileStyleGraphToCSS(graph: StyleGraph): string {
     if (props) {
       cssLines.push(`${selector} {\n${props}\n}`);
 
-      // For sub-element targets: propagate inherited properties to child text
+      // For BEM sub-element targets: propagate inherited properties to child text
       // elements so they override theme rawCss rules like `.mkly-document p`.
-      if (isSubElement) {
+      // Skip for tag targets — they already target specific tags directly.
+      if (isSubElement && !isTagTarget) {
         const inheritedProps = Object.entries(expandedProps)
           .filter(([k]) => INHERITED_CSS_PROPS.has(cssProperty(k)))
           .map(([k, v]) => `  ${cssProperty(k)}: ${resolveValue(v)};`)
