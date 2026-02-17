@@ -136,6 +136,10 @@ describe('htmlToMarkdown: entity decoding', () => {
     expect(htmlToMarkdown("It&#039;s")).toBe("It's");
   });
 
+  it('decodes &apos;', () => {
+    expect(htmlToMarkdown("It&apos;s")).toBe("It's");
+  });
+
   it('converts &nbsp; to \\~', () => {
     expect(htmlToMarkdown('Hello&nbsp;World')).toBe('Hello\\~World');
   });

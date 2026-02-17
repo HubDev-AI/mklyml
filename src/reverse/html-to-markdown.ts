@@ -63,6 +63,7 @@ export function htmlToMarkdown(html: string): string {
   text = text.replace(/&gt;/g, '>');
   text = text.replace(/&quot;/g, '"');
   text = text.replace(/&#039;/g, "'");
+  text = text.replace(/&apos;/g, "'");
   text = text.replace(/&nbsp;/g, '\\~');
 
   // Clean up whitespace
