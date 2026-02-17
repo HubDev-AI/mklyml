@@ -379,6 +379,36 @@ describe('parseStyleGraph → serializeStyleGraph round-trip', () => {
   });
 });
 
+// ===== Serialization: interleaved self/sub-element =====
+
+describe('serializeStyleGraph: interleaved rules', () => {
+  it('merges multiple self rules created by interleaved sub-elements', () => {
+    const graph = parseStyleGraph([
+      'core/card',
+      '  padding: 16px',
+      '  .img',
+      '    object-fit: cover',
+      '  border: 1px solid #ccc',
+      '  .body',
+      '    color: #333',
+      '  margin: 8px',
+    ].join('\n'));
+
+    const serialized = serializeStyleGraph(graph);
+    const reparsed = parseStyleGraph(serialized);
+
+    // All self properties must survive the round-trip
+    const selfRule = reparsed.rules.find(r => r.target === 'self');
+    expect(selfRule?.properties).toHaveProperty('padding', '16px');
+    expect(selfRule?.properties).toHaveProperty('border', '1px solid #ccc');
+    expect(selfRule?.properties).toHaveProperty('margin', '8px');
+
+    // Sub-element rules must survive too
+    expect(reparsed.rules.find(r => r.target === 'img')?.properties).toHaveProperty('object-fit', 'cover');
+    expect(reparsed.rules.find(r => r.target === 'body')?.properties).toHaveProperty('color', '#333');
+  });
+});
+
 // ===== resolveSelector =====
 
 describe('resolveSelector', () => {
