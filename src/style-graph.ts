@@ -524,14 +524,19 @@ export function serializeStyleGraph(graph: StyleGraph): string {
   for (const [selectorKey, blockRules] of grouped) {
     if (lines.length > 0) lines.push('');
 
-    // Find the "self" rule (block root properties)
-    const selfRule = blockRules.find(r => r.target === 'self');
+    // Merge all "self" rules (block root properties) — the parser may produce
+    // multiple self rules when sub-element sections interleave with self properties.
+    const selfRules = blockRules.filter(r => r.target === 'self');
     const otherRules = blockRules.filter(r => r.target !== 'self');
+    const mergedSelfProps: Record<string, string> = {};
+    for (const r of selfRules) {
+      Object.assign(mergedSelfProps, r.properties);
+    }
 
     lines.push(selectorKey);
 
-    if (selfRule) {
-      for (const [prop, value] of Object.entries(selfRule.properties)) {
+    if (Object.keys(mergedSelfProps).length > 0) {
+      for (const [prop, value] of Object.entries(mergedSelfProps)) {
         lines.push(`  ${prop}: ${value}`);
       }
     }
