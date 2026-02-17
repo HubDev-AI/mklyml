@@ -2,6 +2,7 @@ import { htmlToMarkdown } from './html-to-markdown';
 import { normalizeHtmlIndent } from './generic-parser';
 import { extractMklyMeta } from './utils';
 import {
+  decodeHtmlEntities,
   escapeRegex,
   extractAttr,
   findTagWithClass,
@@ -153,7 +154,7 @@ export function parseCoreBlock(blockHtml: string, blockType: string): ParsedBloc
       const levelMatch = blockHtml.match(/mkly-core-heading--(\d)/);
       if (levelMatch) block.properties.level = levelMatch[1];
       const textMatch = blockHtml.match(/<h\d[^>]*>([\s\S]*?)<\/h\d>/);
-      if (textMatch) block.content = textMatch[1].replace(/<[^>]+>/g, '').trim();
+      if (textMatch) block.content = decodeHtmlEntities(textMatch[1].replace(/<[^>]+>/g, '').trim());
       break;
     }
     case 'core/text': {
@@ -184,9 +185,10 @@ export function parseCoreBlock(blockHtml: string, blockType: string): ParsedBloc
     case 'core/button': {
       const href = extractAttr(blockHtml, 'href');
       const linkTag = findTagWithClass(blockHtml, 'mkly-core-button__link');
-      const label = linkTag
+      const labelRaw = linkTag
         ? blockHtml.match(/mkly-core-button__link[^>]*>([\s\S]*?)<\/a>/)?.[1]?.replace(/<[^>]+>/g, '').trim()
         : undefined;
+      const label = labelRaw ? decodeHtmlEntities(labelRaw) : undefined;
       if (href) block.properties.url = href;
       if (label) block.properties.label = label;
       break;
@@ -206,7 +208,7 @@ export function parseCoreBlock(blockHtml: string, blockType: string): ParsedBloc
     }
     case 'core/quote': {
       const authorMatch = blockHtml.match(/mkly-core-quote__author[^>]*>\u2014\s*([^<]*)<\/footer>/);
-      if (authorMatch) block.properties.author = authorMatch[1].trim();
+      if (authorMatch) block.properties.author = decodeHtmlEntities(authorMatch[1].trim());
       const content = blockHtml.match(/<blockquote[^>]*>([\s\S]*?)(?:<footer|<\/blockquote>)/);
       if (content) block.content = htmlToMarkdown(content[1]);
       break;
@@ -276,7 +278,7 @@ export function parseCoreBlock(blockHtml: string, blockType: string): ParsedBloc
         const href = extractAttrFromTag(ctaTag, 'href');
         if (href) block.properties.url = href;
         const labelMatch = blockHtml.match(/mkly-core-cta__button[^>]*>([\s\S]*?)<\/a>/);
-        if (labelMatch) block.properties.buttonText = labelMatch[1].replace(/<[^>]+>/g, '').trim();
+        if (labelMatch) block.properties.buttonText = decodeHtmlEntities(labelMatch[1].replace(/<[^>]+>/g, '').trim());
       }
       // Extract content before the CTA button
       const ctaInner = extractInnerHtml(blockHtml, 'mkly-core-cta');
