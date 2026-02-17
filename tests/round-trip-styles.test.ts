@@ -411,6 +411,28 @@ describe('round-trip: edge cases', () => {
     expect(fatalRecompile).toHaveLength(0);
   });
 
+  it('round-trips user-defined variables (non-registered names)', () => {
+    const source = [
+      '--- use: core',
+      '',
+      '--- meta',
+      'version: 1',
+      '',
+      '--- style',
+      'primary: #1a1a1a',
+      'core/text',
+      '  color: $primary',
+      '',
+      '--- core/text',
+      'Styled with user variable',
+    ].join('\n');
+
+    const { compiled, fatalRecompile } = roundTrip(source);
+    expect(fatalRecompile).toHaveLength(0);
+    // The compiled HTML must have --mkly-primary as a custom property (CSS is embedded in HTML)
+    expect(compiled.html).toContain('--mkly-primary');
+  });
+
   it('round-trips code block', () => {
     const source = [
       '--- use: core',

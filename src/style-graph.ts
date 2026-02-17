@@ -156,7 +156,7 @@ function getIndent(line: string): number {
   let count = 0;
   for (const ch of line) {
     if (ch === ' ') count++;
-    else if (ch === '\t') count += 2;
+    else if (ch === '\t') count += 4;
     else break;
   }
   return count;
@@ -277,6 +277,7 @@ function parseIndentedToGraph(source: string): StyleGraph {
   let isRawContext = false;
   let blockBaseIndent = -1;
   let targetFromSubElement = false;
+  let subElementIndent = -1;
 
   function flushRule() {
     if (currentBlock && Object.keys(currentProps).length > 0) {
@@ -300,6 +301,7 @@ function parseIndentedToGraph(source: string): StyleGraph {
       isRawContext = false;
       blockBaseIndent = -1;
       targetFromSubElement = false;
+      subElementIndent = -1;
 
       // Variable declaration: "key: value" (must have space after colon to
       // distinguish from pseudo selectors like "card:hover")
@@ -387,6 +389,7 @@ function parseIndentedToGraph(source: string): StyleGraph {
       flushRule();
       currentTarget = `>${tagPseudoMatch[1]}${tagPseudoMatch[2]}`;
       targetFromSubElement = true;
+      subElementIndent = indent;
       continue;
     }
 
@@ -396,6 +399,7 @@ function parseIndentedToGraph(source: string): StyleGraph {
       flushRule();
       currentTarget = `>${tagMatch[1]}`;
       targetFromSubElement = true;
+      subElementIndent = indent;
       continue;
     }
 
@@ -405,6 +409,7 @@ function parseIndentedToGraph(source: string): StyleGraph {
       flushRule();
       currentTarget = `${subPseudoMatch[1]}${subPseudoMatch[2]}`;
       targetFromSubElement = true;
+      subElementIndent = indent;
       continue;
     }
 
@@ -414,6 +419,7 @@ function parseIndentedToGraph(source: string): StyleGraph {
       flushRule();
       currentTarget = subMatch[1] === 'self' ? 'self' : subMatch[1];
       targetFromSubElement = true;
+      subElementIndent = indent;
       continue;
     }
 
@@ -423,17 +429,19 @@ function parseIndentedToGraph(source: string): StyleGraph {
       flushRule();
       currentTarget = `self${pseudoMatch[1]}`;
       targetFromSubElement = true;
+      subElementIndent = indent;
       continue;
     }
 
-    // Property at the block's base indent resets target to 'self'
+    // Property at the sub-element's indent level or shallower resets target to 'self'
     // (e.g. `padding: 24px` after `.source` properties).
     // Only resets when the target was set by a sub-element/pseudo inside
     // the block — NOT when the target was set at indent 0 (e.g. card:hover).
-    if (indent <= blockBaseIndent && currentTarget !== 'self' && targetFromSubElement) {
+    if (indent <= subElementIndent && currentTarget !== 'self' && targetFromSubElement) {
       flushRule();
       currentTarget = 'self';
       targetFromSubElement = false;
+      subElementIndent = -1;
     }
 
     // Property inside a rule
@@ -609,7 +617,7 @@ export function compileStyleGraphToCSS(graph: StyleGraph): string {
       if (v.name in VARIABLE_TO_CSS) {
         varLines.push(`  ${VARIABLE_TO_CSS[v.name]}: ${v.value};`);
       } else {
-        varLines.push(`  ${cssProperty(v.name)}: ${resolveValue(v.value)};`);
+        varLines.push(`  ${resolveVariableName(v.name)}: ${resolveValue(v.value)};`);
       }
     }
     cssLines.push(`.mkly-document {\n${varLines.join('\n')}\n}`);
