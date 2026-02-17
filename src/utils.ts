@@ -63,7 +63,7 @@ export function markdownToHtml(content: string, lineMap?: number[]): string {
       closeList();
       const { clean, classAttr } = extractClassAttr(t.slice(2));
       result.push(`<h1${la(idx)}${classAttr}>${inlineFormat(clean)}</h1>`);
-    } else if (t.startsWith('- ')) {
+    } else if (t.startsWith('- ') || t.startsWith('* ')) {
       if (listType !== 'ul') { closeList(); result.push('<ul>'); listType = 'ul'; }
       const { clean, classAttr } = extractClassAttr(t.slice(2));
       result.push(`<li${la(idx)}${classAttr}>${inlineFormat(clean)}</li>`);
