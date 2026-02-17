@@ -450,4 +450,39 @@ describe('round-trip: edge cases', () => {
     const { fatalRecompile } = roundTrip(source);
     expect(fatalRecompile).toHaveLength(0);
   });
+
+  it('round-trips heading with HTML entities (ampersand)', () => {
+    const source = [
+      '--- use: core',
+      '',
+      '--- meta',
+      'version: 1',
+      '',
+      '--- core/heading',
+      'level: 2',
+      'Tom & Jerry',
+    ].join('\n');
+
+    const { reversed, fatalRecompile } = roundTrip(source);
+    expect(fatalRecompile).toHaveLength(0);
+    expect(reversed).toContain('Tom & Jerry');
+    expect(reversed).not.toContain('&amp;');
+  });
+
+  it('round-trips button label with HTML entities', () => {
+    const source = [
+      '--- use: core',
+      '',
+      '--- meta',
+      'version: 1',
+      '',
+      '--- core/button',
+      'url: https://example.com',
+      'label: Buy & Save',
+    ].join('\n');
+
+    const { reversed, fatalRecompile } = roundTrip(source);
+    expect(fatalRecompile).toHaveLength(0);
+    expect(reversed).toContain('label: Buy & Save');
+  });
 });
