@@ -735,6 +735,21 @@ describe('resolveForEmail', () => {
   it('passes through plain values', () => {
     expect(resolveForEmail('16px', {})).toBe('16px');
   });
+
+  it('resolves nested var() fallbacks', () => {
+    const result = resolveForEmail('var(--mkly-size, var(--mkly-default, 16px))', {});
+    expect(result).toBe('16px');
+  });
+
+  it('resolves nested var() when inner variable exists', () => {
+    const result = resolveForEmail('var(--mkly-size, var(--mkly-default, 16px))', { default: '20px' });
+    expect(result).toBe('20px');
+  });
+
+  it('resolves nested var() when outer variable exists', () => {
+    const result = resolveForEmail('var(--mkly-size, var(--mkly-default, 16px))', { size: '24px' });
+    expect(result).toBe('24px');
+  });
 });
 
 // ===== getEmailStyleMap =====

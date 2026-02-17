@@ -863,25 +863,29 @@ export function resolveForEmail(value: string, variables: Record<string, string>
     return variables[name] ?? value;
   });
 
-  // Resolve var(--mkly-*) references
-  resolved = resolved.replace(/var\(([^)]+)\)/g, (match, varExpr: string) => {
-    const parts = varExpr.split(',').map(p => p.trim());
-    const varName = parts[0];
-    const fallback = parts.length > 1 ? parts.slice(1).join(',').trim() : undefined;
+  // Resolve var(--mkly-*) references (handles nested var() via loop)
+  let prev = '';
+  while (prev !== resolved && resolved.includes('var(')) {
+    prev = resolved;
+    resolved = resolved.replace(/var\(([^()]+)\)/g, (match, varExpr: string) => {
+      const commaIdx = varExpr.indexOf(',');
+      const varName = commaIdx !== -1 ? varExpr.slice(0, commaIdx).trim() : varExpr.trim();
+      const fallback = commaIdx !== -1 ? varExpr.slice(commaIdx + 1).trim() : undefined;
 
-    // Try reverse mapping
-    const mklyKey = CSS_TO_VARIABLE[varName];
-    if (mklyKey && variables[mklyKey] !== undefined) return variables[mklyKey];
+      // Try reverse mapping
+      const mklyKey = CSS_TO_VARIABLE[varName];
+      if (mklyKey && variables[mklyKey] !== undefined) return variables[mklyKey];
 
-    // Try direct variable name (strip --mkly- prefix)
-    const stripped = varName.replace(/^--mkly-/, '').replace(/-([a-z])/g, (_, c) => c.toUpperCase());
-    if (variables[stripped] !== undefined) return variables[stripped];
+      // Try direct variable name (strip --mkly- prefix)
+      const stripped = varName.replace(/^--mkly-/, '').replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+      if (variables[stripped] !== undefined) return variables[stripped];
 
-    // Use CSS fallback value if present
-    if (fallback !== undefined) return fallback;
+      // Use CSS fallback value if present
+      if (fallback !== undefined) return fallback;
 
-    return match;
-  });
+      return match;
+    });
+  }
 
   return resolved;
 }
