@@ -486,11 +486,36 @@ export function reverseWeb(html: string, options?: ReverseWebOptions): string {
     }
   }
 
-  // Extract content from mkly-document div
+  // Extract content from mkly-document element using depth-aware matching.
+  // The simple greedy regex was buggy: `[\s\S]+` with end-anchor `$` would capture
+  // past the real closing tag when the document was wrapped in an outer element.
   let content = html;
-  const docMatch = html.match(/class="mkly-document"[^>]*>([\s\S]+)<\/(?:main|div)>\s*$/);
-  if (docMatch) {
-    content = docMatch[1];
+  const docOpenMatch = html.match(/<(main|div)\s[^>]*class="mkly-document"[^>]*>/);
+  if (docOpenMatch) {
+    const tag = docOpenMatch[1]; // "main" or "div"
+    const afterOpen = docOpenMatch.index! + docOpenMatch[0].length;
+    // Find matching close tag via depth tracking
+    const openRe = new RegExp(`<${tag}[\\s>]`, 'gi');
+    const closeRe = new RegExp(`</${tag}>`, 'gi');
+    let depth = 1;
+    let pos = afterOpen;
+    while (depth > 0 && pos < html.length) {
+      openRe.lastIndex = pos;
+      closeRe.lastIndex = pos;
+      const nextOpen = openRe.exec(html);
+      const nextClose = closeRe.exec(html);
+      if (!nextClose) break; // malformed HTML
+      if (nextOpen && nextOpen.index < nextClose.index) {
+        depth++;
+        pos = nextOpen.index + nextOpen[0].length;
+      } else {
+        depth--;
+        if (depth === 0) {
+          content = html.slice(afterOpen, nextClose.index);
+        }
+        pos = nextClose.index + nextClose[0].length;
+      }
+    }
   }
 
   // Extract preserved comments (<!-- mkly-c: text -->) and their positions in content
