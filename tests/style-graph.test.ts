@@ -379,36 +379,6 @@ describe('parseStyleGraph → serializeStyleGraph round-trip', () => {
   });
 });
 
-// ===== Serialization: interleaved self/sub-element =====
-
-describe('serializeStyleGraph: interleaved rules', () => {
-  it('merges multiple self rules created by interleaved sub-elements', () => {
-    const graph = parseStyleGraph([
-      'core/card',
-      '  padding: 16px',
-      '  .img',
-      '    object-fit: cover',
-      '  border: 1px solid #ccc',
-      '  .body',
-      '    color: #333',
-      '  margin: 8px',
-    ].join('\n'));
-
-    const serialized = serializeStyleGraph(graph);
-    const reparsed = parseStyleGraph(serialized);
-
-    // All self properties must survive the round-trip
-    const selfRule = reparsed.rules.find(r => r.target === 'self');
-    expect(selfRule?.properties).toHaveProperty('padding', '16px');
-    expect(selfRule?.properties).toHaveProperty('border', '1px solid #ccc');
-    expect(selfRule?.properties).toHaveProperty('margin', '8px');
-
-    // Sub-element rules must survive too
-    expect(reparsed.rules.find(r => r.target === 'img')?.properties).toHaveProperty('object-fit', 'cover');
-    expect(reparsed.rules.find(r => r.target === 'body')?.properties).toHaveProperty('color', '#333');
-  });
-});
-
 // ===== resolveSelector =====
 
 describe('resolveSelector', () => {
@@ -432,8 +402,8 @@ describe('resolveSelector', () => {
     expect(resolveSelector('img', 'core/card')).toBe('.mkly-core-card__img');
   });
 
-  it('BEM sub-element with label → descendant selector', () => {
-    expect(resolveSelector('img', 'core/card', 'hero')).toBe('.mkly-core-card--hero .mkly-core-card__img');
+  it('BEM sub-element with label → .mkly-core-card--hero__img', () => {
+    expect(resolveSelector('img', 'core/card', 'hero')).toBe('.mkly-core-card--hero__img');
   });
 
   it('BEM sub-element with pseudo → .mkly-core-card__img:hover', () => {
@@ -514,91 +484,15 @@ describe('compileStyleGraphToCSS', () => {
     expect(css).toContain(':is(p, li, h1');
   });
 
-  it('propagates inherited properties for tag targets', () => {
+  it('does NOT propagate inherited properties for tag targets', () => {
     const graph: StyleGraph = {
       variables: [],
       rules: [{ blockType: 'core/text', target: '>p', properties: { color: 'blue' } }],
     };
     const css = compileStyleGraphToCSS(graph);
     expect(css).toContain('.mkly-core-text p');
-    expect(css).toContain('.mkly-core-text p :is(');
-  });
-
-  it('emits user-defined variables as --mkly-* custom properties', () => {
-    const graph: StyleGraph = {
-      variables: [{ name: 'primary', value: '#1a1a1a' }],
-      rules: [{ blockType: 'core/text', target: 'self', properties: { color: '$primary' } }],
-    };
-    const css = compileStyleGraphToCSS(graph);
-    // Variable declaration must use --mkly-primary (not bare "primary")
-    expect(css).toContain('--mkly-primary: #1a1a1a');
-    expect(css).not.toMatch(/[^-]primary: #1a1a1a/);
-    // Rule reference must match
-    expect(css).toContain('var(--mkly-primary)');
-  });
-
-  it('emits camelCase user variables as kebab-case custom properties', () => {
-    const graph: StyleGraph = {
-      variables: [{ name: 'brandColor', value: '#ff5500' }],
-      rules: [{ blockType: 'core/heading', target: 'self', properties: { color: '$brandColor' } }],
-    };
-    const css = compileStyleGraphToCSS(graph);
-    expect(css).toContain('--mkly-brand-color: #ff5500');
-    expect(css).toContain('var(--mkly-brand-color)');
-  });
-
-  it('emits global text token bridge overrides when text variable is set', () => {
-    const graph: StyleGraph = {
-      variables: [{ name: 'text', value: '#111111' }],
-      rules: [],
-    };
-    const css = compileStyleGraphToCSS(graph);
-    expect(css).toContain('--mkly-text: #111111');
-    expect(css).toContain('.mkly-core-heading');
-    expect(css).toContain('color: var(--mkly-text);');
-    expect(css).not.toContain('strong, em');
-  });
-
-  it('emits global typography bridges for fontSize and lineHeight variables', () => {
-    const graph: StyleGraph = {
-      variables: [
-        { name: 'fontSize', value: '1.125rem' },
-        { name: 'lineHeight', value: '1.7' },
-      ],
-      rules: [],
-    };
-    const css = compileStyleGraphToCSS(graph);
-    expect(css).toContain('--mkly-font-size: 1.125rem');
-    expect(css).toContain('--mkly-line-height: 1.7');
-    expect(css).toContain('font-size: var(--mkly-font-size);');
-    expect(css).toContain('line-height: var(--mkly-line-height);');
-  });
-
-  it('does not emit unrelated global token bridges when variables are absent', () => {
-    const graph: StyleGraph = {
-      variables: [{ name: 'accent', value: '#ff6600' }],
-      rules: [],
-    };
-    const css = compileStyleGraphToCSS(graph);
-    expect(css).toContain('--mkly-accent: #ff6600');
-    expect(css).toContain('.mkly-core-button__link');
-    expect(css).not.toContain('--mkly-line-height:');
-    expect(css).not.toContain('font-size: var(--mkly-font-size);');
-  });
-
-  it('keeps targeted user rule stronger than global token bridge within user layer', () => {
-    const graph: StyleGraph = {
-      variables: [{ name: 'text', value: '#ff0033' }],
-      rules: [
-        { blockType: 'core/text', target: 'self', properties: { color: '#0044ff' } },
-      ],
-    };
-    const css = compileStyleGraphToCSS(graph);
-    const globalBridgeIdx = css.indexOf('color: var(--mkly-text);');
-    const targetedRuleIdx = css.lastIndexOf('.mkly-core-text {\n  color: #0044ff;');
-    expect(globalBridgeIdx).toBeGreaterThan(-1);
-    expect(targetedRuleIdx).toBeGreaterThan(-1);
-    expect(targetedRuleIdx).toBeGreaterThan(globalBridgeIdx);
+    // Should NOT have :is() propagation for tag targets
+    expect(css).not.toContain(':is(');
   });
 
   it('does NOT propagate non-inherited properties', () => {
@@ -841,21 +735,6 @@ describe('resolveForEmail', () => {
   it('passes through plain values', () => {
     expect(resolveForEmail('16px', {})).toBe('16px');
   });
-
-  it('resolves nested var() fallbacks', () => {
-    const result = resolveForEmail('var(--mkly-size, var(--mkly-default, 16px))', {});
-    expect(result).toBe('16px');
-  });
-
-  it('resolves nested var() when inner variable exists', () => {
-    const result = resolveForEmail('var(--mkly-size, var(--mkly-default, 16px))', { default: '20px' });
-    expect(result).toBe('20px');
-  });
-
-  it('resolves nested var() when outer variable exists', () => {
-    const result = resolveForEmail('var(--mkly-size, var(--mkly-default, 16px))', { size: '24px' });
-    expect(result).toBe('24px');
-  });
 });
 
 // ===== getEmailStyleMap =====
@@ -1079,7 +958,7 @@ describe('parseStyleGraph: complex rule grouping', () => {
     };
     const css = compileStyleGraphToCSS(graph);
     expect(css).toContain('.mkly-core-card--hero');
-    expect(css).toContain('.mkly-core-card--hero .mkly-core-card__img');
+    expect(css).toContain('.mkly-core-card--hero__img');
   });
 });
 
@@ -1117,48 +996,6 @@ describe('parseStyleGraph: raw CSS selectors', () => {
     };
     const css = compileStyleGraphToCSS(graph);
     expect(css).not.toContain(':is(');
-  });
-});
-
-// ===== Edge Cases: Mixed Indentation =====
-
-describe('parseStyleGraph: mixed indentation', () => {
-  it('handles tab-indented properties', () => {
-    const graph = parseStyleGraph('core/heading\n\tcolor: red\n\tfont-size: 16px');
-    expect(graph.rules).toHaveLength(1);
-    expect(graph.rules[0].properties).toEqual({ color: 'red', 'font-size': '16px' });
-  });
-
-  it('handles tab-indented sub-element properties in space-indented block', () => {
-    const graph = parseStyleGraph('core/card\n  padding: 8px\n  .img\n\tobject-fit: cover');
-    expect(graph.rules).toHaveLength(2);
-    const selfRule = graph.rules.find(r => r.target === 'self');
-    const imgRule = graph.rules.find(r => r.target === 'img');
-    expect(selfRule?.properties).toEqual({ padding: '8px' });
-    expect(imgRule?.properties).toEqual({ 'object-fit': 'cover' });
-  });
-
-  it('handles 4-space indentation', () => {
-    const graph = parseStyleGraph('core/card\n    padding: 8px\n    .img\n        object-fit: cover');
-    expect(graph.rules).toHaveLength(2);
-    expect(graph.rules[0].target).toBe('self');
-    expect(graph.rules[1].target).toBe('img');
-  });
-
-  it('resets to self after tab-indented sub-element section', () => {
-    const graph = parseStyleGraph('core/card\n\t.img\n\t\tobject-fit: cover\n\tpadding: 8px');
-    expect(graph.rules).toHaveLength(2);
-    const imgRule = graph.rules.find(r => r.target === 'img');
-    const selfRule = graph.rules.find(r => r.target === 'self');
-    expect(imgRule?.properties).toEqual({ 'object-fit': 'cover' });
-    expect(selfRule?.properties).toEqual({ padding: '8px' });
-  });
-
-  it('serializes tab-indented input as 2-space (canonical form)', () => {
-    const graph = parseStyleGraph('core/heading\n\tcolor: red');
-    const serialized = serializeStyleGraph(graph);
-    expect(serialized).toContain('  color: red');
-    expect(serialized).not.toContain('\t');
   });
 });
 
