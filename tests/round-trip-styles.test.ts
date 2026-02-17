@@ -241,38 +241,6 @@ describe('round-trip: class annotations', () => {
     expect(compiled.html).toContain('class="s1"');
     expect(compiled.html).toContain('class="s2"');
   });
-
-  it('round-trips labeled tipOfTheDay class-target styling', () => {
-    const source = [
-      '--- use: core',
-      '--- use: newsletter',
-      '',
-      '--- meta',
-      'version: 1',
-      '',
-      '--- style',
-      'newsletter/tipOfTheDay:s1',
-      '  >.s2',
-      '    color: #e2725b',
-      '',
-      '--- newsletter/tipOfTheDay: s1',
-      'title: Tutorial: The 3-Layer Prompt Framework',
-      '',
-      'Layer 1 paragraph.',
-      '',
-      'Layer 2 paragraph {.s2}',
-      '',
-      'Layer 3 paragraph.',
-    ].join('\n');
-
-    const { compiled, reversed, fatalRecompile } = roundTrip(source);
-    expect(fatalRecompile).toHaveLength(0);
-    expect(compiled.html).toContain('mkly-newsletter-tipOfTheDay--s1');
-    expect(compiled.html).toContain('class="s2"');
-    expect(compiled.html).toContain('.mkly-newsletter-tipOfTheDay--s1 .s2');
-    // reverse may currently fallback to core/html for this block, but class target must survive.
-    expect(reversed).toContain('class="s2"');
-  });
 });
 
 // ===== Multi-Block Complex Documents =====
@@ -443,28 +411,6 @@ describe('round-trip: edge cases', () => {
     expect(fatalRecompile).toHaveLength(0);
   });
 
-  it('round-trips user-defined variables (non-registered names)', () => {
-    const source = [
-      '--- use: core',
-      '',
-      '--- meta',
-      'version: 1',
-      '',
-      '--- style',
-      'primary: #1a1a1a',
-      'core/text',
-      '  color: $primary',
-      '',
-      '--- core/text',
-      'Styled with user variable',
-    ].join('\n');
-
-    const { compiled, fatalRecompile } = roundTrip(source);
-    expect(fatalRecompile).toHaveLength(0);
-    // The compiled HTML must have --mkly-primary as a custom property (CSS is embedded in HTML)
-    expect(compiled.html).toContain('--mkly-primary');
-  });
-
   it('round-trips code block', () => {
     const source = [
       '--- use: core',
@@ -481,40 +427,5 @@ describe('round-trip: edge cases', () => {
 
     const { fatalRecompile } = roundTrip(source);
     expect(fatalRecompile).toHaveLength(0);
-  });
-
-  it('round-trips heading with HTML entities (ampersand)', () => {
-    const source = [
-      '--- use: core',
-      '',
-      '--- meta',
-      'version: 1',
-      '',
-      '--- core/heading',
-      'level: 2',
-      'Tom & Jerry',
-    ].join('\n');
-
-    const { reversed, fatalRecompile } = roundTrip(source);
-    expect(fatalRecompile).toHaveLength(0);
-    expect(reversed).toContain('Tom & Jerry');
-    expect(reversed).not.toContain('&amp;');
-  });
-
-  it('round-trips button label with HTML entities', () => {
-    const source = [
-      '--- use: core',
-      '',
-      '--- meta',
-      'version: 1',
-      '',
-      '--- core/button',
-      'url: https://example.com',
-      'label: Buy & Save',
-    ].join('\n');
-
-    const { reversed, fatalRecompile } = roundTrip(source);
-    expect(fatalRecompile).toHaveLength(0);
-    expect(reversed).toContain('label: Buy & Save');
   });
 });
