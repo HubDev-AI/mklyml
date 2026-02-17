@@ -632,33 +632,7 @@ export function compileStyleGraphToCSS(graph: StyleGraph): string {
     const isSubElement = rule.target !== 'self' && !rule.target.startsWith('self:');
     const isTagTarget = rule.target.startsWith('>');
 
-    // Expand text-align on BEM sub-elements to margin values (block images need margin for alignment).
-    // Tag targets (">p", ">h1") keep text-align as-is since they target content elements directly.
-    const expandedProps: Record<string, string> = {};
-    for (const [k, v] of Object.entries(rule.properties)) {
-      if (k === 'text-align' && isSubElement && !isTagTarget) {
-        switch (v) {
-          case 'center':
-            expandedProps['margin-left'] = 'auto';
-            expandedProps['margin-right'] = 'auto';
-            break;
-          case 'right':
-            expandedProps['margin-left'] = 'auto';
-            expandedProps['margin-right'] = '0';
-            break;
-          case 'left':
-            expandedProps['margin-left'] = '0';
-            expandedProps['margin-right'] = 'auto';
-            break;
-          default:
-            expandedProps[k] = v;
-        }
-      } else {
-        expandedProps[k] = v;
-      }
-    }
-
-    const props = Object.entries(expandedProps)
+    const props = Object.entries(rule.properties)
       .map(([k, v]) => `  ${cssProperty(k)}: ${resolveValue(v)};`)
       .join('\n');
     if (props) {
@@ -668,7 +642,7 @@ export function compileStyleGraphToCSS(graph: StyleGraph): string {
       // elements so they override theme rawCss rules like `.mkly-document p`.
       // Skip for tag targets — they already target specific tags directly.
       if (isSubElement && !isTagTarget) {
-        const inheritedProps = Object.entries(expandedProps)
+        const inheritedProps = Object.entries(rule.properties)
           .filter(([k]) => INHERITED_CSS_PROPS.has(cssProperty(k)))
           .map(([k, v]) => `  ${cssProperty(k)}: ${resolveValue(v)};`)
           .join('\n');
