@@ -495,6 +495,29 @@ describe('compileStyleGraphToCSS', () => {
     expect(css).not.toContain(':is(');
   });
 
+  it('emits user-defined variables as --mkly-* custom properties', () => {
+    const graph: StyleGraph = {
+      variables: [{ name: 'primary', value: '#1a1a1a' }],
+      rules: [{ blockType: 'core/text', target: 'self', properties: { color: '$primary' } }],
+    };
+    const css = compileStyleGraphToCSS(graph);
+    // Variable declaration must use --mkly-primary (not bare "primary")
+    expect(css).toContain('--mkly-primary: #1a1a1a');
+    expect(css).not.toMatch(/[^-]primary: #1a1a1a/);
+    // Rule reference must match
+    expect(css).toContain('var(--mkly-primary)');
+  });
+
+  it('emits camelCase user variables as kebab-case custom properties', () => {
+    const graph: StyleGraph = {
+      variables: [{ name: 'brandColor', value: '#ff5500' }],
+      rules: [{ blockType: 'core/heading', target: 'self', properties: { color: '$brandColor' } }],
+    };
+    const css = compileStyleGraphToCSS(graph);
+    expect(css).toContain('--mkly-brand-color: #ff5500');
+    expect(css).toContain('var(--mkly-brand-color)');
+  });
+
   it('does NOT propagate non-inherited properties', () => {
     const graph: StyleGraph = {
       variables: [],
@@ -1011,6 +1034,48 @@ describe('parseStyleGraph: raw CSS selectors', () => {
     };
     const css = compileStyleGraphToCSS(graph);
     expect(css).not.toContain(':is(');
+  });
+});
+
+// ===== Edge Cases: Mixed Indentation =====
+
+describe('parseStyleGraph: mixed indentation', () => {
+  it('handles tab-indented properties', () => {
+    const graph = parseStyleGraph('core/heading\n\tcolor: red\n\tfont-size: 16px');
+    expect(graph.rules).toHaveLength(1);
+    expect(graph.rules[0].properties).toEqual({ color: 'red', 'font-size': '16px' });
+  });
+
+  it('handles tab-indented sub-element properties in space-indented block', () => {
+    const graph = parseStyleGraph('core/card\n  padding: 8px\n  .img\n\tobject-fit: cover');
+    expect(graph.rules).toHaveLength(2);
+    const selfRule = graph.rules.find(r => r.target === 'self');
+    const imgRule = graph.rules.find(r => r.target === 'img');
+    expect(selfRule?.properties).toEqual({ padding: '8px' });
+    expect(imgRule?.properties).toEqual({ 'object-fit': 'cover' });
+  });
+
+  it('handles 4-space indentation', () => {
+    const graph = parseStyleGraph('core/card\n    padding: 8px\n    .img\n        object-fit: cover');
+    expect(graph.rules).toHaveLength(2);
+    expect(graph.rules[0].target).toBe('self');
+    expect(graph.rules[1].target).toBe('img');
+  });
+
+  it('resets to self after tab-indented sub-element section', () => {
+    const graph = parseStyleGraph('core/card\n\t.img\n\t\tobject-fit: cover\n\tpadding: 8px');
+    expect(graph.rules).toHaveLength(2);
+    const imgRule = graph.rules.find(r => r.target === 'img');
+    const selfRule = graph.rules.find(r => r.target === 'self');
+    expect(imgRule?.properties).toEqual({ 'object-fit': 'cover' });
+    expect(selfRule?.properties).toEqual({ padding: '8px' });
+  });
+
+  it('serializes tab-indented input as 2-space (canonical form)', () => {
+    const graph = parseStyleGraph('core/heading\n\tcolor: red');
+    const serialized = serializeStyleGraph(graph);
+    expect(serialized).toContain('  color: red');
+    expect(serialized).not.toContain('\t');
   });
 });
 
