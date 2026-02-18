@@ -241,6 +241,38 @@ describe('round-trip: class annotations', () => {
     expect(compiled.html).toContain('class="s1"');
     expect(compiled.html).toContain('class="s2"');
   });
+
+  it('round-trips labeled tipOfTheDay class-target styling', () => {
+    const source = [
+      '--- use: core',
+      '--- use: newsletter',
+      '',
+      '--- meta',
+      'version: 1',
+      '',
+      '--- style',
+      'newsletter/tipOfTheDay:s1',
+      '  >.s2',
+      '    color: #e2725b',
+      '',
+      '--- newsletter/tipOfTheDay: s1',
+      'title: Tutorial: The 3-Layer Prompt Framework',
+      '',
+      'Layer 1 paragraph.',
+      '',
+      'Layer 2 paragraph {.s2}',
+      '',
+      'Layer 3 paragraph.',
+    ].join('\n');
+
+    const { compiled, reversed, fatalRecompile } = roundTrip(source);
+    expect(fatalRecompile).toHaveLength(0);
+    expect(compiled.html).toContain('mkly-newsletter-tipOfTheDay--s1');
+    expect(compiled.html).toContain('class="s2"');
+    expect(compiled.html).toContain('.mkly-newsletter-tipOfTheDay--s1 .s2');
+    // reverse may currently fallback to core/html for this block, but class target must survive.
+    expect(reversed).toContain('class="s2"');
+  });
 });
 
 // ===== Multi-Block Complex Documents =====
