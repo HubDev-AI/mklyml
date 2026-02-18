@@ -95,7 +95,10 @@ function serializeDocument(doc: MklyDocument): string {
 
   // Style blocks
   for (const style of doc.styles) {
-    sections.push(`--- style\n${style}`);
+    const normalizedStyle = style.trim();
+    if (normalizedStyle) {
+      sections.push(`--- style\n${normalizedStyle}`);
+    }
   }
 
   // Content blocks
