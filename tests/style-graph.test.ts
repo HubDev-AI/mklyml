@@ -432,8 +432,8 @@ describe('resolveSelector', () => {
     expect(resolveSelector('img', 'core/card')).toBe('.mkly-core-card__img');
   });
 
-  it('BEM sub-element with label → .mkly-core-card--hero__img', () => {
-    expect(resolveSelector('img', 'core/card', 'hero')).toBe('.mkly-core-card--hero__img');
+  it('BEM sub-element with label → descendant selector', () => {
+    expect(resolveSelector('img', 'core/card', 'hero')).toBe('.mkly-core-card--hero .mkly-core-card__img');
   });
 
   it('BEM sub-element with pseudo → .mkly-core-card__img:hover', () => {
@@ -1026,7 +1026,7 @@ describe('parseStyleGraph: complex rule grouping', () => {
     };
     const css = compileStyleGraphToCSS(graph);
     expect(css).toContain('.mkly-core-card--hero');
-    expect(css).toContain('.mkly-core-card--hero__img');
+    expect(css).toContain('.mkly-core-card--hero .mkly-core-card__img');
   });
 });
 

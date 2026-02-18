@@ -114,15 +114,18 @@ export function resolveSelector(target: string, blockType: string, label?: strin
     return `.${base}${labelSuffix} ${tag}`;
   }
 
-  // BEM sub-element with optional pseudo
+  // BEM sub-element with optional pseudo.
+  // With label: descendant selector — ".block--label .block__sub"
+  // (the label modifier is on the block root, the sub-element is a child)
+  // Without label: single class — ".block__sub"
   const pseudoIdx = target.indexOf(':');
-  if (pseudoIdx !== -1) {
-    const sub = target.slice(0, pseudoIdx);
-    const pseudo = target.slice(pseudoIdx);
-    return `.${base}${labelSuffix}__${sub}${pseudo}`;
-  }
+  const sub = pseudoIdx !== -1 ? target.slice(0, pseudoIdx) : target;
+  const pseudo = pseudoIdx !== -1 ? target.slice(pseudoIdx) : '';
 
-  return `.${base}${labelSuffix}__${target}`;
+  if (label) {
+    return `.${base}${labelSuffix} .${base}__${sub}${pseudo}`;
+  }
+  return `.${base}__${sub}${pseudo}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -661,6 +664,20 @@ export function compileStyleGraphToCSS(graph: StyleGraph): string {
           .join('\n');
         if (inheritedProps) {
           cssLines.push(`${selector} :is(p, li, h1, h2, h3, h4, h5, h6, blockquote) {\n${inheritedProps}\n}`);
+        }
+      }
+
+      // For self rules with text-align, propagate centering/alignment to block-level
+      // img children via auto margins. Images have display:block (for baseline gap fix),
+      // so text-align on the parent has no effect — they need margin: auto instead.
+      if ((rule.target === 'self' || rule.target.startsWith('self:')) && rule.properties['text-align']) {
+        const align = rule.properties['text-align'];
+        if (align === 'center') {
+          cssLines.push(`${selector} img {\n  margin-left: auto;\n  margin-right: auto;\n}`);
+        } else if (align === 'right') {
+          cssLines.push(`${selector} img {\n  margin-left: auto;\n  margin-right: 0;\n}`);
+        } else if (align === 'left') {
+          cssLines.push(`${selector} img {\n  margin-left: 0;\n  margin-right: auto;\n}`);
         }
       }
     }
