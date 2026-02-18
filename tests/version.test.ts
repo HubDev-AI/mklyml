@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'bun:test';
-import { parse, mkly, MKLY_DEFAULT_VERSION, CORE_KIT, resolveVersion, validateVersionAgainstKit, getAvailableFeatures } from '../src/index';
+import { parse, mkly, MKLY_DEFAULT_VERSION, CORE_KIT, resolveVersion, validateVersionAgainstKit, getAvailableFeatures, defineKit } from '../src/index';
 
 describe('version system', () => {
   describe('MKLY_DEFAULT_VERSION', () => {
@@ -17,10 +17,10 @@ describe('version system', () => {
   });
 
   describe('resolveVersion', () => {
-    it('should error when no version in meta', () => {
+    it('should default silently when no version in meta', () => {
       const result = resolveVersion({});
       expect(result.version).toBe(1);
-      expect(result.error).toContain('Missing required');
+      expect(result.error).toBeUndefined();
     });
 
     it('should resolve explicit version 1', () => {
@@ -124,9 +124,10 @@ describe('version system', () => {
       expect(result.errors.some(e => e.message.includes('Unsupported version'))).toBe(true);
     });
 
-    it('should error without explicit version', () => {
+    it('should compile successfully without explicit version', () => {
       const result = mkly('--- use: core\n\n--- core/text\n\nHello', { kits: { core: CORE_KIT } });
-      expect(result.errors.some(e => e.message.includes('Missing required'))).toBe(true);
+      expect(result.html).toContain('Hello');
+      expect(result.errors.filter(e => e.severity === 'error')).toHaveLength(0);
     });
 
     it('should produce unknown block warning without core kit', () => {
@@ -152,6 +153,52 @@ describe('version system', () => {
       // v2 doc should have accordion
       const v2 = mkly('--- use: core\n\n--- meta\nversion: 2\n\n--- core/accordion\n\nContent', { kits: { core: futureKit } });
       expect(v2.html).toContain('mkly-core-accordion');
+    });
+  });
+
+  describe('zero-boilerplate', () => {
+    it('should compile without --- use: when kits are available', () => {
+      const result = mkly('--- meta\nversion: 1\n\n--- core/heading\nlevel: 1\n\nHello', { kits: { core: CORE_KIT } });
+      expect(result.html).toContain('mkly-core-heading');
+      expect(result.errors.filter(e => e.severity === 'error')).toHaveLength(0);
+    });
+
+    it('should compile without --- meta when kits are available', () => {
+      const result = mkly('--- use: core\n\n--- core/heading\nlevel: 1\n\nHello', { kits: { core: CORE_KIT } });
+      expect(result.html).toContain('mkly-core-heading');
+      expect(result.errors.filter(e => e.severity === 'error')).toHaveLength(0);
+    });
+
+    it('should compile with NO directives at all', () => {
+      const result = mkly('--- core/heading\nlevel: 1\n\nHello', { kits: { core: CORE_KIT } });
+      expect(result.html).toContain('mkly-core-heading');
+      expect(result.errors.filter(e => e.severity === 'error')).toHaveLength(0);
+    });
+
+    it('should auto-detect multiple kits from block types', () => {
+      const testKit = defineKit({
+        name: 'test',
+        blocks: [
+          { name: 'widget', contentMode: 'text', compile: (b) => `<div class="mkly-test-widget">${b.content}</div>` },
+        ],
+      });
+      const result = mkly('--- core/heading\nlevel: 1\n\nTitle\n\n--- test/widget\n\nHello', {
+        kits: { core: CORE_KIT, test: testKit },
+      });
+      expect(result.html).toContain('mkly-core-heading');
+      expect(result.html).toContain('mkly-test-widget');
+    });
+
+    it('should emit meta tags for round-trip even without directives', () => {
+      const result = mkly('--- core/heading\nlevel: 1\n\nHello', { kits: { core: CORE_KIT } });
+      expect(result.html).toContain('<meta name="mkly:use" content="core">');
+      expect(result.html).toContain('<meta name="mkly:version" content="1">');
+    });
+
+    it('should still error on invalid (non-numeric) version', () => {
+      const result = mkly('--- meta\nversion: abc\n\n--- core/heading\nlevel: 1\n\nHello', { kits: { core: CORE_KIT } });
+      expect(result.html).toBe('');
+      expect(result.errors.some(e => e.message.includes('Invalid version'))).toBe(true);
     });
   });
 });
