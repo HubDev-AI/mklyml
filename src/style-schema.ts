@@ -8,6 +8,8 @@ export type StylePropertyType = 'color' | 'spacing' | 'alignment' | 'select' | '
 export interface StylePreset {
   label: string;
   value: string;
+  /** Optional group name for `<optgroup>` rendering */
+  group?: string;
 }
 
 export interface StylePropertyDef {
@@ -67,12 +69,49 @@ const OVERFLOW_OPTIONS: StylePreset[] = [
   { label: 'visible', value: 'visible' },
 ];
 
+import { GOOGLE_FONTS } from './google-fonts';
+
+const _gf = (name: string): StylePreset => {
+  const def = GOOGLE_FONTS[name];
+  return { label: name, value: `'${name}', ${def?.fallback ?? 'sans-serif'}`, group: def?.category };
+};
+
 const FONT_FAMILY_OPTIONS: StylePreset[] = [
   { label: 'Default', value: '' },
-  { label: 'System', value: "-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif" },
-  { label: 'Serif', value: 'Georgia, serif' },
-  { label: 'Mono', value: "'JetBrains Mono', 'Fira Code', monospace" },
-  { label: 'Sans', value: "'Inter', 'Helvetica Neue', sans-serif" },
+  // System stacks
+  { label: 'System UI', value: "-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif", group: 'System' },
+  { label: 'System Serif', value: "Georgia, 'Times New Roman', serif", group: 'System' },
+  { label: 'System Mono', value: "ui-monospace, 'SF Mono', Menlo, Consolas, monospace", group: 'System' },
+  // Sans-serif
+  _gf('Inter'), _gf('Roboto'), _gf('Open Sans'), _gf('Lato'), _gf('Montserrat'),
+  _gf('Poppins'), _gf('Nunito'), _gf('Raleway'), _gf('Work Sans'), _gf('DM Sans'),
+  _gf('Plus Jakarta Sans'), _gf('Outfit'), _gf('Manrope'), _gf('Figtree'),
+  _gf('Source Sans 3'), _gf('Noto Sans'), _gf('Barlow'), _gf('Lexend'),
+  _gf('Public Sans'), _gf('Archivo'), _gf('Rubik'), _gf('Mulish'),
+  _gf('Exo 2'), _gf('Karla'), _gf('Mukta'), _gf('Quicksand'),
+  _gf('Cabin'), _gf('Josefin Sans'), _gf('Saira'), _gf('Albert Sans'),
+  _gf('Sora'), _gf('Space Grotesk'), _gf('Red Hat Display'), _gf('Urbanist'), _gf('Geist'),
+  // Serif
+  _gf('Merriweather'), _gf('Playfair Display'), _gf('Lora'), _gf('PT Serif'),
+  _gf('Libre Baskerville'), _gf('Crimson Text'), _gf('EB Garamond'), _gf('Source Serif 4'),
+  _gf('Noto Serif'), _gf('Bitter'), _gf('DM Serif Display'), _gf('Cormorant Garamond'),
+  _gf('Spectral'), _gf('Alegreya'), _gf('Vollkorn'), _gf('Cardo'),
+  _gf('Old Standard TT'), _gf('Libre Caslon Text'), _gf('Zilla Slab'), _gf('IBM Plex Serif'),
+  _gf('Newsreader'), _gf('Fraunces'), _gf('Young Serif'), _gf('Instrument Serif'), _gf('Brygada 1918'),
+  // Display
+  _gf('Oswald'), _gf('Bebas Neue'), _gf('Anton'), _gf('Righteous'),
+  _gf('Passion One'), _gf('Abril Fatface'), _gf('Bungee'), _gf('Permanent Marker'),
+  _gf('Pacifico'), _gf('Fredoka'), _gf('Comfortaa'), _gf('Audiowide'),
+  _gf('Orbitron'), _gf('Major Mono Display'), _gf('Silkscreen'), _gf('Press Start 2P'),
+  _gf('Chivo'), _gf('Big Shoulders Display'), _gf('Syne'), _gf('Alfa Slab One'),
+  // Monospace
+  _gf('JetBrains Mono'), _gf('Fira Code'), _gf('Source Code Pro'), _gf('IBM Plex Mono'),
+  _gf('Space Mono'), _gf('Roboto Mono'), _gf('Ubuntu Mono'), _gf('Inconsolata'),
+  _gf('Red Hat Mono'), _gf('DM Mono'),
+  // Handwriting
+  _gf('Dancing Script'), _gf('Caveat'), _gf('Satisfy'), _gf('Great Vibes'),
+  _gf('Indie Flower'), _gf('Kalam'), _gf('Patrick Hand'), _gf('Shadows Into Light'),
+  _gf('Amatic SC'), _gf('Sacramento'),
 ];
 
 const FONT_SIZE_OPTIONS: StylePreset[] = [

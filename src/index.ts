@@ -58,6 +58,8 @@ export {
   getAllStylePropertyNames,
 } from './style-schema';
 export type { StylePropertyType, StylePreset, StylePropertyDef, StyleSector } from './style-schema';
+export { GOOGLE_FONTS, extractGoogleFonts, buildGoogleFontsUrl, buildGoogleFontsLink } from './google-fonts';
+export type { GoogleFontDef } from './google-fonts';
 export { createCompletionData } from './completions';
 export type { CompletionItem, CompletionData, KitInfo, PropertyType } from './completions';
 export { MKLY_DEFAULT_VERSION, resolveVersion, validateVersionAgainstKit, getAvailableFeatures } from './version';
