@@ -1,5 +1,19 @@
 import { kebabToCamel } from './utils';
 
+function normalizeInlineText(text: string): string {
+  return text
+    .replace(/\s*\n\s*/g, ' ')
+    .replace(/[ \t]{2,}/g, ' ')
+    .trim();
+}
+
+function normalizeBlockText(text: string): string {
+  return text
+    .replace(/\s*\n\s*/g, ' ')
+    .replace(/[ \t]{2,}/g, ' ')
+    .trim();
+}
+
 export function htmlToMarkdown(html: string): string {
   let text = html;
 
@@ -12,10 +26,14 @@ export function htmlToMarkdown(html: string): string {
   text = text.replace(/^<(?:p|div)[^>]*>|<\/(?:p|div)>$/gi, '');
 
   // Strong/bold
-  text = text.replace(/<(?:strong|b)>([\s\S]*?)<\/(?:strong|b)>/gi, '**$1**');
+  text = text.replace(/<(?:strong|b)>([\s\S]*?)<\/(?:strong|b)>/gi, (_m, inner: string) =>
+    `**${normalizeInlineText(inner)}**`,
+  );
 
   // Em/italic
-  text = text.replace(/<(?:em|i)>([\s\S]*?)<\/(?:em|i)>/gi, '*$1*');
+  text = text.replace(/<(?:em|i)>([\s\S]*?)<\/(?:em|i)>/gi, (_m, inner: string) =>
+    `*${normalizeInlineText(inner)}*`,
+  );
 
   // Inline styled spans → mkly inline syntax (inside-out loop for nested spans)
   const spanRe = /<span\s+style="([^"]*)"[^>]*>((?:(?!<\/?span[\s>])[\s\S])*?)<\/span>/gi;
@@ -35,21 +53,23 @@ export function htmlToMarkdown(html: string): string {
   );
 
   // Links
-  text = text.replace(/<a\s+href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/gi, '[$2]($1)');
+  text = text.replace(/<a\s+href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/gi, (_m, href: string, inner: string) =>
+    `[${normalizeInlineText(inner)}](${href})`,
+  );
 
   // Headings — preserve {.className} annotations from class attributes
-  text = text.replace(/<h1([^>]*)>([\s\S]*?)<\/h1>/gi, (_, a, c) => `# ${c}${classAnnotation(a)}`);
-  text = text.replace(/<h2([^>]*)>([\s\S]*?)<\/h2>/gi, (_, a, c) => `## ${c}${classAnnotation(a)}`);
-  text = text.replace(/<h3([^>]*)>([\s\S]*?)<\/h3>/gi, (_, a, c) => `### ${c}${classAnnotation(a)}`);
-  text = text.replace(/<h4([^>]*)>([\s\S]*?)<\/h4>/gi, (_, a, c) => `#### ${c}${classAnnotation(a)}`);
-  text = text.replace(/<h5([^>]*)>([\s\S]*?)<\/h5>/gi, (_, a, c) => `##### ${c}${classAnnotation(a)}`);
-  text = text.replace(/<h6([^>]*)>([\s\S]*?)<\/h6>/gi, (_, a, c) => `###### ${c}${classAnnotation(a)}`);
+  text = text.replace(/<h1([^>]*)>([\s\S]*?)<\/h1>/gi, (_, a, c) => `# ${normalizeBlockText(c)}${classAnnotation(a)}`);
+  text = text.replace(/<h2([^>]*)>([\s\S]*?)<\/h2>/gi, (_, a, c) => `## ${normalizeBlockText(c)}${classAnnotation(a)}`);
+  text = text.replace(/<h3([^>]*)>([\s\S]*?)<\/h3>/gi, (_, a, c) => `### ${normalizeBlockText(c)}${classAnnotation(a)}`);
+  text = text.replace(/<h4([^>]*)>([\s\S]*?)<\/h4>/gi, (_, a, c) => `#### ${normalizeBlockText(c)}${classAnnotation(a)}`);
+  text = text.replace(/<h5([^>]*)>([\s\S]*?)<\/h5>/gi, (_, a, c) => `##### ${normalizeBlockText(c)}${classAnnotation(a)}`);
+  text = text.replace(/<h6([^>]*)>([\s\S]*?)<\/h6>/gi, (_, a, c) => `###### ${normalizeBlockText(c)}${classAnnotation(a)}`);
 
   // List items — preserve {.className} annotations
-  text = text.replace(/<li([^>]*)>([\s\S]*?)<\/li>/gi, (_, a, c) => `- ${c}${classAnnotation(a)}`);
+  text = text.replace(/<li([^>]*)>([\s\S]*?)<\/li>/gi, (_, a, c) => `- ${normalizeBlockText(c)}${classAnnotation(a)}`);
 
   // Paragraphs — preserve {.className} annotations
-  text = text.replace(/<p([^>]*)>([\s\S]*?)<\/p>/gi, (_, a, c) => `${c}${classAnnotation(a)}\n`);
+  text = text.replace(/<p([^>]*)>([\s\S]*?)<\/p>/gi, (_, a, c) => `${normalizeBlockText(c)}${classAnnotation(a)}\n`);
 
   // Line breaks
   text = text.replace(/<br\s*\/?>/gi, '\n');
@@ -92,4 +112,3 @@ function cssToMklyInline(styleString: string): string {
     return `@${mklyProp}:${val}`;
   }).filter(Boolean).join(' ');
 }
-
