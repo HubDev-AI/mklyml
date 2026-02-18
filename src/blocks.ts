@@ -57,7 +57,7 @@ const image: BlockDefinition = {
   },
   styleHints: {
     self: ['text-align', 'margin', 'padding', 'background', 'border-radius', 'border-width', 'border-style', 'border-color', 'opacity', 'box-shadow'],
-    img: ['text-align', 'width', 'height', 'margin', 'padding', 'max-width', 'border-radius', 'border-width', 'border-style', 'border-color', 'opacity', 'box-shadow'],
+    img: ['width', 'height', 'margin', 'padding', 'max-width', 'border-radius', 'border-width', 'border-style', 'border-color', 'opacity', 'box-shadow'],
   },
   contentHints: { contentProps: ['src', 'url'] },
   compile: (block, ctx) => {
@@ -71,7 +71,7 @@ const image: BlockDefinition = {
     }
     const width = prop(block, 'width');
     const widthStyle = width ? ` width="${escapeHtml(width)}"` : '';
-    return `<figure class="${cls(block)}"><img src="${safeUrl(src)}" alt="${escapeHtml(alt ?? '')}"${widthStyle} class="${cls(block, '__img')}" style="display:block;"${lineAttr(block, 'src', 'url')}></figure>`;
+    return `<figure class="${cls(block)}"><img src="${safeUrl(src)}" alt="${escapeHtml(alt ?? '')}"${widthStyle} class="${cls(block, '__img')}"${lineAttr(block, 'src', 'url')}></figure>`;
   },
 };
 
@@ -83,7 +83,7 @@ const button: BlockDefinition = {
   },
   styleHints: {
     self: ['text-align', 'margin', 'padding', 'background', 'border-radius', 'border-width', 'border-style', 'border-color', 'opacity'],
-    link: ['display', 'text-align', 'color', 'background', 'font-family', 'font-size', 'font-weight', 'padding', 'margin', 'border-radius', 'border-width', 'border-style', 'border-color', 'box-shadow', 'opacity'],
+    link: ['text-align', 'color', 'background', 'font-family', 'font-size', 'font-weight', 'padding', 'margin', 'border-radius', 'border-width', 'border-style', 'border-color', 'box-shadow', 'opacity'],
   },
   contentHints: { contentProps: ['url', 'href', 'label'], contentBody: true },
   compile: (block, ctx) => {
@@ -173,7 +173,7 @@ const hero: BlockDefinition = {
   },
   styleHints: {
     self: ['padding', 'margin', 'background', 'border-radius', 'border-width', 'border-style', 'border-color', 'text-align', 'min-height', 'overflow', 'opacity', 'box-shadow'],
-    img: ['text-align', 'width', 'max-width', 'height', 'margin', 'padding', 'border-radius', 'border-width', 'border-style', 'border-color', 'opacity', 'box-shadow'],
+    img: ['width', 'max-width', 'height', 'margin', 'padding', 'border-radius', 'border-width', 'border-style', 'border-color', 'opacity', 'box-shadow'],
     content: ['color', 'font-family', 'font-size', 'font-weight', 'line-height', 'padding', 'margin', 'text-align', 'background', 'border-radius'],
   },
   contentHints: { contentProps: ['image', 'src'], contentBody: true },
@@ -181,7 +181,7 @@ const hero: BlockDefinition = {
     const src = prop(block, 'image') ?? prop(block, 'src');
     const alt = prop(block, 'alt') ?? '';
     const imageHtml = src
-      ? `<img src="${safeUrl(src)}" alt="${escapeHtml(alt)}" class="${cls(block, '__img')}" style="display:block;width:100%;"${lineAttr(block, 'image', 'src')}>`
+      ? `<img src="${safeUrl(src)}" alt="${escapeHtml(alt)}" class="${cls(block, '__img')}"${lineAttr(block, 'image', 'src')}>`
       : '';
     const contentHtml = block.content
       ? `<div class="${cls(block, '__content')}">${md(block)}</div>`
@@ -221,16 +221,16 @@ const card: BlockDefinition = {
   },
   styleHints: {
     self: ['text-align', 'padding', 'margin', 'background', 'border-radius', 'border-width', 'border-style', 'border-color', 'box-shadow', 'overflow', 'opacity', 'max-width'],
-    img: ['text-align', 'width', 'max-width', 'height', 'margin', 'padding', 'border-radius', 'border-width', 'border-style', 'border-color', 'opacity', 'box-shadow'],
+    img: ['width', 'max-width', 'height', 'margin', 'padding', 'border-radius', 'border-width', 'border-style', 'border-color', 'opacity', 'box-shadow'],
     body: ['text-align', 'color', 'font-size', 'font-family', 'line-height', 'padding', 'margin', 'background'],
-    link: ['display', 'text-align', 'color', 'font-size', 'font-weight', 'font-family', 'padding', 'margin', 'background', 'border-radius'],
+    link: ['text-align', 'color', 'font-size', 'font-weight', 'font-family', 'padding', 'margin', 'background', 'border-radius'],
   },
   contentHints: { contentProps: ['image', 'link', 'url'], contentBody: true },
   compile: (block) => {
     const img = prop(block, 'image');
     const link = prop(block, 'link') ?? prop(block, 'url');
     const imgHtml = img
-      ? `<img src="${safeUrl(img)}" alt="" class="${cls(block, '__img')}" style="display:block;"${lineAttr(block, 'image')}>`
+      ? `<img src="${safeUrl(img)}" alt="" class="${cls(block, '__img')}"${lineAttr(block, 'image')}>`
       : '';
     const linkHtml = link
       ? `<a href="${safeUrl(link)}" class="${cls(block, '__link')}"${lineAttr(block, 'link', 'url')}>Read more</a>`
@@ -259,7 +259,7 @@ const header: BlockDefinition = {
   },
   styleHints: {
     self: ['text-align', 'padding', 'margin', 'background', 'border-radius', 'border-width', 'border-style', 'border-color', 'opacity', 'box-shadow'],
-    logo: ['text-align', 'width', 'max-width', 'height', 'margin', 'padding', 'border-radius', 'opacity'],
+    logo: ['width', 'max-width', 'height', 'margin', 'padding', 'border-radius', 'opacity'],
     title: ['color', 'font-family', 'font-size', 'font-weight', 'margin', 'padding', 'line-height'],
     subtitle: ['color', 'font-family', 'font-size', 'font-weight', 'font-style', 'margin', 'padding', 'line-height'],
   },
@@ -267,7 +267,7 @@ const header: BlockDefinition = {
     const logo = prop(block, 'logo');
     const title = prop(block, 'title') ?? block.content.trim();
     const logoHtml = logo
-      ? `<img src="${safeUrl(logo)}" alt="" class="${cls(block, '__logo')}" style="display:block;"${lineAttr(block, 'logo')}>`
+      ? `<img src="${safeUrl(logo)}" alt="" class="${cls(block, '__logo')}"${lineAttr(block, 'logo')}>`
       : '';
     const titleHtml = title
       ? `<h1 class="${cls(block, '__title')}"${lineAttr(block, 'title')}>${escapeHtml(title)}</h1>`
@@ -298,7 +298,7 @@ const cta: BlockDefinition = {
   },
   styleHints: {
     self: ['text-align', 'color', 'font-family', 'font-size', 'line-height', 'padding', 'margin', 'background', 'border-radius', 'border-width', 'border-style', 'border-color', 'opacity'],
-    button: ['display', 'text-align', 'color', 'background', 'font-family', 'font-size', 'font-weight', 'padding', 'margin', 'border-radius', 'border-width', 'border-style', 'border-color', 'box-shadow', 'opacity'],
+    button: ['text-align', 'color', 'background', 'font-family', 'font-size', 'font-weight', 'padding', 'margin', 'border-radius', 'border-width', 'border-style', 'border-color', 'box-shadow', 'opacity'],
   },
   contentHints: { contentProps: ['url', 'href'], contentBody: true },
   compile: (block, ctx) => {
@@ -347,6 +347,7 @@ const html: BlockDefinition = {
   contentMode: 'verbatim',
   styleHints: {
     self: ['padding', 'margin', 'background', 'border-radius', 'border-width', 'border-style', 'border-color', 'opacity', 'overflow'],
+    '>': ['color', 'font-family', 'font-size', 'font-weight', 'font-style', 'line-height', 'margin', 'padding', 'background', 'border-radius', 'opacity'],
   },
   compile: (block, ctx) => {
     let content = block.content;
@@ -359,17 +360,7 @@ const html: BlockDefinition = {
     const pretty = prop(block, 'prettify') === 'true';
     if (pretty) ctx.extraStyles.add(PRETTY_CSS);
     const blockClass = cls(block) + (pretty ? ' mkly-core-html--pretty' : '');
-    const trimmed = content.trim();
-    const tagMatch = trimmed.match(/^<(\w+)([\s>])/);
-    if (!tagMatch) {
-      return `<div class="${blockClass}">${content}</div>`;
-    }
-    const classAttr = trimmed.match(/^<\w+[^>]*\sclass="([^"]*)"/);
-    if (classAttr) {
-      return trimmed.replace(/^(<\w+[^>]*\sclass=")([^"]*)(")/,
-        `$1$2 ${blockClass}$3`);
-    }
-    return trimmed.replace(/^(<\w+)/, `$1 class="${blockClass}"`);
+    return `<div class="${blockClass}">${content}</div>`;
   },
 };
 
@@ -437,7 +428,7 @@ const CORE_DOCS: Record<string, BlockDocs> = {
     color: '#10b981',
     summary: 'Displays an image with optional alt text and width control.',
     usage: '--- core/image\nsrc: https://picsum.photos/seed/mkly-image/600/400\nalt: A scenic mountain view\nwidth: 600',
-    htmlPreview: '<figure class="mkly-core-image"><img src="https://picsum.photos/seed/mkly-image/600/400" alt="A scenic mountain view" width="600" class="mkly-core-image__img" style="display:block;max-width:100%;border-radius:6px;"></figure>',
+    htmlPreview: '<figure class="mkly-core-image"><img src="https://picsum.photos/seed/mkly-image/600/400" alt="A scenic mountain view" width="600" class="mkly-core-image__img"></figure>',
     properties: [
       { name: 'src', description: 'Image URL', required: true, example: 'https://example.com/photo.jpg' },
       { name: 'alt', description: 'Alt text for accessibility', example: 'A scenic mountain view' },
@@ -512,7 +503,7 @@ const CORE_DOCS: Record<string, BlockDocs> = {
     color: '#0ea5e9',
     summary: 'Full-width hero section with optional background image and overlay content.',
     usage: '--- core/hero\nimage: https://picsum.photos/seed/mkly-hero/800/400\nalt: Hero banner\n\n# Welcome\n\nYour journey starts here.',
-    htmlPreview: '<section class="mkly-core-hero"><img src="https://picsum.photos/seed/mkly-hero/800/400" alt="Hero banner" class="mkly-core-hero__img" style="display:block;width:100%;border-radius:6px;"><div class="mkly-core-hero__content"><h1>Welcome</h1><p>Your journey starts here.</p></div></section>',
+    htmlPreview: '<section class="mkly-core-hero"><img src="https://picsum.photos/seed/mkly-hero/800/400" alt="Hero banner" class="mkly-core-hero__img"><div class="mkly-core-hero__content"><h1>Welcome</h1><p>Your journey starts here.</p></div></section>',
     properties: [
       { name: 'image', description: 'Hero background/banner image URL', example: 'https://example.com/hero.jpg' },
       { name: 'src', description: 'Alias for image', example: 'https://example.com/hero.jpg' },
@@ -538,7 +529,7 @@ const CORE_DOCS: Record<string, BlockDocs> = {
     color: '#8b5cf6',
     summary: 'Content card with optional image, text, and link.',
     usage: '--- core/card\nimage: https://picsum.photos/seed/mkly-card/400/250\nlink: https://example.com/article\n\nA brief summary of the article.',
-    htmlPreview: '<article class="mkly-core-card"><img src="https://picsum.photos/seed/mkly-card/400/250" alt="" class="mkly-core-card__img" style="display:block;max-width:100%;border-radius:6px;"><div class="mkly-core-card__body"><p>A brief summary of the article.</p><a href="https://example.com/article" class="mkly-core-card__link">Read more</a></div></article>',
+    htmlPreview: '<article class="mkly-core-card"><img src="https://picsum.photos/seed/mkly-card/400/250" alt="" class="mkly-core-card__img"><div class="mkly-core-card__body"><p>A brief summary of the article.</p><a href="https://example.com/article" class="mkly-core-card__link">Read more</a></div></article>',
     properties: [
       { name: 'image', description: 'Card thumbnail image URL', example: 'https://example.com/thumb.jpg' },
       { name: 'link', description: 'Card link URL', example: 'https://example.com/article' },
@@ -562,7 +553,7 @@ const CORE_DOCS: Record<string, BlockDocs> = {
     color: '#2563eb',
     summary: 'Newsletter/page header with optional logo and title.',
     usage: '--- core/header\nlogo: https://picsum.photos/seed/mkly-logo/200/50\ntitle: My Newsletter',
-    htmlPreview: '<header class="mkly-core-header"><img src="https://picsum.photos/seed/mkly-logo/200/50" alt="" class="mkly-core-header__logo" style="display:block;"><h1 class="mkly-core-header__title">My Newsletter</h1></header>',
+    htmlPreview: '<header class="mkly-core-header"><img src="https://picsum.photos/seed/mkly-logo/200/50" alt="" class="mkly-core-header__logo"><h1 class="mkly-core-header__title">My Newsletter</h1></header>',
     properties: [
       { name: 'logo', description: 'Logo image URL', example: 'https://example.com/logo.png' },
       { name: 'title', description: 'Header title text', example: 'My Newsletter' },
