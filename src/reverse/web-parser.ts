@@ -163,13 +163,23 @@ export function parseCoreBlock(blockHtml: string, blockType: string): ParsedBloc
       break;
     }
     case 'core/html': {
-      block.content = normalizeHtmlIndent(
-        blockHtml
-          .replace(/\s*mkly-core-html/g, '')
-          .replace(/\s+class="\s*"/g, '')
-          .replace(/\s+data-mkly-[\w-]+(?:="[^"]*")?/g, '')
-          .trim(),
-      );
+      let cleaned = blockHtml
+        .replace(/\s*mkly-core-html(?:--\w+)*/g, '')
+        .replace(/\s+class="\s*"/g, '')
+        .replace(/\s+data-mkly-[\w-]+(?:="[^"]*")?/g, '')
+        .trim();
+      // Unwrap bare <div> wrapper added by the compiler for plain-text content.
+      // The compiler wraps non-HTML content in <div class="mkly-core-html">, and
+      // after stripping that class we get <div>text</div>. Unwrap to just text
+      // so the round-trip is stable. Only safe when inner content is text (no leading tag).
+      const bareDivMatch = cleaned.match(/^<div>([\s\S]*)<\/div>$/);
+      if (bareDivMatch) {
+        const inner = bareDivMatch[1].trim();
+        if (inner && !/^<\w/.test(inner)) {
+          cleaned = inner;
+        }
+      }
+      block.content = normalizeHtmlIndent(cleaned);
       block.verbatim = true;
       break;
     }
