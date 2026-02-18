@@ -90,8 +90,8 @@ export function reverseEmail(html: string, options?: ReverseEmailOptions): strin
         }
       }
 
-      // Match styled div/p elements with text content
-      const blockRegex = /<(?:div|p)\b[^>]*style="[^"]*"[^>]*>([\s\S]*?)<\/(?:div|p)>/gi;
+      // Match div/p elements with text content (style attr optional — properly compiled blocks may not have inline styles)
+      const blockRegex = /<(?:div|p)\b[^>]*>([\s\S]*?)<\/(?:div|p)>/gi;
       let bMatch;
       while ((bMatch = blockRegex.exec(html)) !== null) {
         const inner = bMatch[1].trim();
