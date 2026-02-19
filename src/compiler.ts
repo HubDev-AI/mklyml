@@ -421,7 +421,7 @@ function serializeInlineDefines(inlineThemes: MklyTheme[], inlinePresets: MklyPr
 
 function wrapWeb(content: string, extraCSS: string[], maxWidth: number, meta?: Record<string, string>, uses?: string[], themes?: string[], presets?: string[], sourceMap?: boolean, styleSources?: string[], inlineThemes?: MklyTheme[], inlinePresets?: MklyPreset[]): string {
   if (sourceMap) {
-    extraCSS = [...extraCSS, '[data-mkly-active]{outline:2px solid rgba(59,130,246,0.5);outline-offset:2px;transition:outline 0.15s}'];
+    extraCSS = [...extraCSS, '[data-mkly-active]{outline:0.125rem solid rgba(59,130,246,0.5);outline-offset:0.125rem;transition:outline 0.15s}'];
   }
   const styleTag = extraCSS.length > 0
     ? `<style>${extraCSS.join('\n')}</style>\n`

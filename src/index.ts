@@ -55,9 +55,17 @@ export {
   DEFAULT_SELF_SECTORS,
   HOVER_SECTOR,
   TARGET_SECTORS,
+  resolveStyleSectors,
   getAllStylePropertyNames,
 } from './style-schema';
-export type { StylePropertyType, StylePreset, StylePropertyDef, StyleSector } from './style-schema';
+export type {
+  StylePropertyType,
+  StylePreset,
+  StylePropertyDef,
+  StyleSector,
+  ResolveStyleSectorsInput,
+  ResolvedStyleSectors,
+} from './style-schema';
 export { GOOGLE_FONTS, extractGoogleFonts, buildGoogleFontsUrl, buildGoogleFontsLink } from './google-fonts';
 export type { GoogleFontDef } from './google-fonts';
 export { createCompletionData } from './completions';

@@ -241,6 +241,39 @@ Hello world`);
     });
   });
 
+  describe('global token overrides', () => {
+    it('keeps user global text override in user layer over core/default theme', () => {
+      const result = html(`--- use: core
+--- theme: core/default
+
+--- meta
+version: 1
+
+--- style
+text: #ff0033
+fontSize: 1.125rem
+lineHeight: 1.75
+
+--- core/heading
+Title
+
+--- core/text
+Body copy`);
+
+      const styleTag = result.match(/<style>([\s\S]*?)<\/style>/)?.[1] ?? '';
+      expect(styleTag).toContain('@layer theme');
+      expect(styleTag).toContain('@layer user');
+      expect(styleTag.indexOf('@layer user')).toBeGreaterThan(styleTag.indexOf('@layer theme'));
+      expect(styleTag).toContain('--mkly-text: #ff0033;');
+      expect(styleTag).toContain('--mkly-font-size: 1.125rem;');
+      expect(styleTag).toContain('--mkly-line-height: 1.75;');
+      expect(styleTag).toContain('.mkly-core-heading');
+      expect(styleTag).toContain('color: var(--mkly-text);');
+      expect(styleTag).toContain('font-size: var(--mkly-font-size);');
+      expect(styleTag).toContain('line-height: var(--mkly-line-height);');
+    });
+  });
+
   describe('error collection', () => {
     it('should collect errors for missing required properties', () => {
       const doc = parse(`--- use: core\n\n--- meta\nversion: 1\n\n--- core/spacer`);
@@ -285,8 +318,8 @@ Hello world`);
     it('should inject preset CSS into compiled output', () => {
       const source = `--- use: core\n--- preset: test-glass\n\n--- meta\nversion: 1\n\n--- core/card\ntitle: Hello\nurl: https://example.com\n\nContent`;
       const result = mkly(source, { kits: { core: kitWithPresets } });
-      expect(result.html).toContain('backdrop-filter: blur(12px)');
-      expect(result.html).toContain('border-radius: 16px');
+      expect(result.html).toContain('backdrop-filter: blur(0.75rem)');
+      expect(result.html).toContain('border-radius: 1rem');
     });
 
     it('should emit meta tag for active preset', () => {
@@ -317,17 +350,17 @@ Hello world`);
 
       const source = `--- use: core\n--- theme: theme-with-card\n--- preset: round\n\n--- meta\nversion: 1\n\n--- core/card\ntitle: Test\nurl: https://example.com\n\nContent`;
       const result = mkly(source, { kits: { core: kitWithBoth } });
-      // Preset CSS comes after theme CSS, so 20px should appear later (and win)
+      // Preset CSS comes after theme CSS, so 1.25rem should appear later (and win)
       const css = result.html.match(/<style>([\s\S]*?)<\/style>/)?.[1] ?? '';
-      const lastRadiusMatch = css.lastIndexOf('border-radius: 20px');
-      const themeRadiusMatch = css.lastIndexOf('border-radius: 4px');
+      const lastRadiusMatch = css.lastIndexOf('border-radius: 1.25rem');
+      const themeRadiusMatch = css.lastIndexOf('border-radius: 0.25rem');
       expect(lastRadiusMatch).toBeGreaterThan(themeRadiusMatch);
     });
 
     it('should resolve qualified preset names', () => {
       const source = `--- use: core\n--- preset: core/test-glass\n\n--- meta\nversion: 1\n\n--- core/text\nHello`;
       const result = mkly(source, { kits: { core: kitWithPresets } });
-      expect(result.html).toContain('backdrop-filter: blur(12px)');
+      expect(result.html).toContain('backdrop-filter: blur(0.75rem)');
       expect(result.errors.some(e => e.message.includes('Unknown preset'))).toBe(false);
     });
 

@@ -548,6 +548,59 @@ describe('compileStyleGraphToCSS', () => {
     expect(css).toContain('var(--mkly-brand-color)');
   });
 
+  it('emits global text token bridge overrides when text variable is set', () => {
+    const graph: StyleGraph = {
+      variables: [{ name: 'text', value: '#111111' }],
+      rules: [],
+    };
+    const css = compileStyleGraphToCSS(graph);
+    expect(css).toContain('--mkly-text: #111111');
+    expect(css).toContain('.mkly-core-heading');
+    expect(css).toContain('color: var(--mkly-text);');
+  });
+
+  it('emits global typography bridges for fontSize and lineHeight variables', () => {
+    const graph: StyleGraph = {
+      variables: [
+        { name: 'fontSize', value: '1.125rem' },
+        { name: 'lineHeight', value: '1.7' },
+      ],
+      rules: [],
+    };
+    const css = compileStyleGraphToCSS(graph);
+    expect(css).toContain('--mkly-font-size: 1.125rem');
+    expect(css).toContain('--mkly-line-height: 1.7');
+    expect(css).toContain('font-size: var(--mkly-font-size);');
+    expect(css).toContain('line-height: var(--mkly-line-height);');
+  });
+
+  it('does not emit unrelated global token bridges when variables are absent', () => {
+    const graph: StyleGraph = {
+      variables: [{ name: 'accent', value: '#ff6600' }],
+      rules: [],
+    };
+    const css = compileStyleGraphToCSS(graph);
+    expect(css).toContain('--mkly-accent: #ff6600');
+    expect(css).toContain('.mkly-core-button__link');
+    expect(css).not.toContain('--mkly-line-height:');
+    expect(css).not.toContain('font-size: var(--mkly-font-size);');
+  });
+
+  it('keeps targeted user rule stronger than global token bridge within user layer', () => {
+    const graph: StyleGraph = {
+      variables: [{ name: 'text', value: '#ff0033' }],
+      rules: [
+        { blockType: 'core/text', target: 'self', properties: { color: '#0044ff' } },
+      ],
+    };
+    const css = compileStyleGraphToCSS(graph);
+    const globalBridgeIdx = css.indexOf('color: var(--mkly-text);');
+    const targetedRuleIdx = css.lastIndexOf('.mkly-core-text {\n  color: #0044ff;');
+    expect(globalBridgeIdx).toBeGreaterThan(-1);
+    expect(targetedRuleIdx).toBeGreaterThan(-1);
+    expect(targetedRuleIdx).toBeGreaterThan(globalBridgeIdx);
+  });
+
   it('does NOT propagate non-inherited properties', () => {
     const graph: StyleGraph = {
       variables: [],
