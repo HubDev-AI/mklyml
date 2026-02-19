@@ -52,7 +52,7 @@ export function errorHtml(message: string, line: number): string {
   return [
     '<div class="mkly-error" data-mkly-error data-line="',
     String(line),
-    '" style="padding:8px 12px;margin:4px 0;background:#fff0f0;border-left:3px solid #e53935;color:#c62828;font:13px/1.4 monospace;">',
+    '" style="padding:0.5rem 0.75rem;margin:0.25rem 0;background:#fff0f0;border-left:0.1875rem solid #e53935;color:#c62828;font:0.8125rem/1.4 monospace;">',
     escapeHtml(message),
     ' <span style="opacity:0.6;">\u2014 line ',
     String(line),

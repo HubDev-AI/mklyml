@@ -320,7 +320,7 @@ const cta: BlockDefinition = {
 const PRETTY_CSS = [
   '.mkly-core-html--pretty{',
   'font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;',
-  'font-size:16px;line-height:1.7;color:inherit;',
+  'font-size:1rem;line-height:1.7;color:inherit;',
   'white-space:pre-line;word-wrap:break-word',
   '}',
   '.mkly-core-html--pretty h1,.mkly-core-html--pretty h2,.mkly-core-html--pretty h3,.mkly-core-html--pretty h4,.mkly-core-html--pretty h5,.mkly-core-html--pretty h6{margin:1.2em 0 0.4em;line-height:1.3;font-weight:700;white-space:normal}',
@@ -331,14 +331,14 @@ const PRETTY_CSS = [
   '.mkly-core-html--pretty ul,.mkly-core-html--pretty ol{margin:0 0 1em;padding-left:1.5em;white-space:normal}',
   '.mkly-core-html--pretty li{margin-bottom:0.3em}',
   '.mkly-core-html--pretty a{color:var(--mkly-accent,#3b82f6);text-decoration:underline}',
-  '.mkly-core-html--pretty blockquote{margin:1em 0;padding:0.5em 1em;border-left:3px solid var(--mkly-border,rgba(128,128,128,0.3));font-style:italic;white-space:normal}',
-  '.mkly-core-html--pretty code{font-family:"JetBrains Mono",Menlo,monospace;font-size:0.9em;padding:0.15em 0.35em;border-radius:3px;background:var(--mkly-codeBg,var(--mkly-bgSubtle,rgba(128,128,128,0.1)))}',
-  '.mkly-core-html--pretty pre{margin:1em 0;padding:1em;border-radius:6px;background:var(--mkly-codeBg,var(--mkly-bgSubtle,rgba(128,128,128,0.08)));overflow-x:auto;white-space:pre}',
+  '.mkly-core-html--pretty blockquote{margin:1em 0;padding:0.5em 1em;border-left:0.1875rem solid var(--mkly-border,rgba(128,128,128,0.3));font-style:italic;white-space:normal}',
+  '.mkly-core-html--pretty code{font-family:"JetBrains Mono",Menlo,monospace;font-size:0.9em;padding:0.15em 0.35em;border-radius:0.1875rem;background:var(--mkly-codeBg,var(--mkly-bgSubtle,rgba(128,128,128,0.1)))}',
+  '.mkly-core-html--pretty pre{margin:1em 0;padding:1em;border-radius:0.375rem;background:var(--mkly-codeBg,var(--mkly-bgSubtle,rgba(128,128,128,0.08)));overflow-x:auto;white-space:pre}',
   '.mkly-core-html--pretty pre code{padding:0;background:none}',
-  '.mkly-core-html--pretty hr{border:none;border-top:1px solid var(--mkly-border,rgba(128,128,128,0.2));margin:1.5em 0}',
-  '.mkly-core-html--pretty img{max-width:100%;height:auto;border-radius:4px}',
+  '.mkly-core-html--pretty hr{border:none;border-top:0.0625rem solid var(--mkly-border,rgba(128,128,128,0.2));margin:1.5em 0}',
+  '.mkly-core-html--pretty img{max-width:100%;height:auto;border-radius:0.25rem}',
   '.mkly-core-html--pretty table{border-collapse:collapse;width:100%;margin:1em 0;white-space:normal}',
-  '.mkly-core-html--pretty th,.mkly-core-html--pretty td{padding:0.5em 0.75em;border:1px solid var(--mkly-border,rgba(128,128,128,0.2));text-align:left}',
+  '.mkly-core-html--pretty th,.mkly-core-html--pretty td{padding:0.5em 0.75em;border:0.0625rem solid var(--mkly-border,rgba(128,128,128,0.2));text-align:left}',
   '.mkly-core-html--pretty th{font-weight:600;background:var(--mkly-bgSubtle,rgba(128,128,128,0.05))}',
 ].join('');
 
@@ -467,7 +467,7 @@ const CORE_DOCS: Record<string, BlockDocs> = {
     color: '#94a3b8',
     summary: 'Adds vertical spacing between blocks.',
     usage: '--- core/spacer\nheight: 40',
-    htmlPreview: '<div class="mkly-core-spacer" style="height:40px;"></div>',
+    htmlPreview: '<div class="mkly-core-spacer" style="height:2.5rem;"></div>',
     properties: [
       { name: 'height', description: 'Spacing height in pixels', required: true, example: '40' },
     ],
@@ -591,7 +591,7 @@ const CORE_DOCS: Record<string, BlockDocs> = {
     color: '#64748b',
     summary: 'Raw HTML passthrough — content is rendered as-is without processing. Toggle "prettify" for clean typography on plain text or markdown content.',
     usage: '--- core/html\nprettify: true\n\n<h2>My Content</h2>\n<p>Text with nice formatting.</p>\n\n--- /core/html',
-    htmlPreview: '<div style="font-family:-apple-system,sans-serif;line-height:1.7"><h3 style="margin:0 0 8px;font-weight:700">Formatted Content</h3><p style="margin:0 0 8px">This is prettified HTML with clean typography, proper spacing, and readable text.</p><ul style="padding-left:1.5em;margin:0"><li>Lists look nice</li><li>Links are styled</li></ul></div>',
+    htmlPreview: '<div style="font-family:-apple-system,sans-serif;line-height:1.7"><h3 style="margin:0 0 0.5rem;font-weight:700">Formatted Content</h3><p style="margin:0 0 0.5rem">This is prettified HTML with clean typography, proper spacing, and readable text.</p><ul style="padding-left:1.5em;margin:0"><li>Lists look nice</li><li>Links are styled</li></ul></div>',
     properties: [
       { name: 'prettify', description: 'Add typography styles for readable formatting', example: 'true' },
     ],
@@ -602,14 +602,14 @@ const CORE_DOCS: Record<string, BlockDocs> = {
 const CORE_KEYFRAMES: Record<string, string> = {
   fadeIn: 'from{opacity:0}to{opacity:1}',
   fadeOut: 'from{opacity:1}to{opacity:0}',
-  slideUp: 'from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}',
-  slideDown: 'from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}',
-  slideInLeft: 'from{opacity:0;transform:translateX(-20px)}to{opacity:1;transform:translateX(0)}',
-  slideInRight: 'from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}',
+  slideUp: 'from{opacity:0;transform:translateY(1.25rem)}to{opacity:1;transform:translateY(0)}',
+  slideDown: 'from{opacity:0;transform:translateY(-1.25rem)}to{opacity:1;transform:translateY(0)}',
+  slideInLeft: 'from{opacity:0;transform:translateX(-1.25rem)}to{opacity:1;transform:translateX(0)}',
+  slideInRight: 'from{opacity:0;transform:translateX(1.25rem)}to{opacity:1;transform:translateX(0)}',
   scaleIn: 'from{opacity:0;transform:scale(0.95)}to{opacity:1;transform:scale(1)}',
   pulse: '0%,100%{opacity:1}50%{opacity:0.6}',
-  bounce: '0%{transform:translateY(0)}30%{transform:translateY(-8px)}50%{transform:translateY(0)}70%{transform:translateY(-4px)}100%{transform:translateY(0)}',
-  shake: '0%,100%{transform:translateX(0)}20%{transform:translateX(-4px)}40%{transform:translateX(4px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}',
+  bounce: '0%{transform:translateY(0)}30%{transform:translateY(-0.5rem)}50%{transform:translateY(0)}70%{transform:translateY(-0.25rem)}100%{transform:translateY(0)}',
+  shake: '0%,100%{transform:translateX(0)}20%{transform:translateX(-0.25rem)}40%{transform:translateX(0.25rem)}60%{transform:translateX(-0.25rem)}80%{transform:translateX(0.25rem)}',
 };
 
 export const CORE_KIT: MklyKit = {

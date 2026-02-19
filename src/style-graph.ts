@@ -65,6 +65,177 @@ const INHERITED_CSS_PROPS = new Set([
   'text-indent', 'word-spacing',
 ]);
 
+// When users set document-level style variables (--- style text/bg/accent/etc),
+// emit user-layer selector overrides so these globals can win over hardcoded
+// theme/preset rawCss colors across all kits.
+const GLOBAL_TOKEN_OVERRIDE_RULES: Record<string, string> = {
+  text: `.mkly-document,
+.mkly-document :is(p, li, h1, h2, h3, h4, h5, h6, strong, em),
+.mkly-core-heading,
+.mkly-core-text,
+.mkly-core-code pre,
+.mkly-core-list,
+.mkly-core-section__title,
+.mkly-core-card__body h2,
+.mkly-core-header__title,
+.mkly-newsletter-intro,
+.mkly-newsletter-category__title,
+.mkly-newsletter-quickHits__title,
+.mkly-newsletter-tools__title,
+.mkly-newsletter-community__author,
+.mkly-newsletter-personalNote,
+.mkly-newsletter-poll__question,
+.mkly-newsletter-recommendations__title,
+.mkly-newsletter-custom__title {
+  color: var(--mkly-text);
+}`,
+  muted: `.mkly-document blockquote,
+.mkly-core-quote,
+.mkly-core-quote__author,
+.mkly-core-footer,
+.mkly-core-footer a,
+.mkly-newsletter-featured__author,
+.mkly-newsletter-community__quote,
+.mkly-newsletter-sponsor__badge,
+.mkly-newsletter-outro,
+.mkly-newsletter-item__meta {
+  color: var(--mkly-muted);
+}`,
+  accent: `.mkly-document a,
+.mkly-core-card__link,
+.mkly-newsletter-featured__source,
+.mkly-newsletter-featured__link,
+.mkly-newsletter-item__source,
+.mkly-newsletter-item__link,
+.mkly-newsletter-quickHits a,
+.mkly-newsletter-tools a,
+.mkly-newsletter-recommendations a,
+.mkly-newsletter-sponsor__link,
+.mkly-newsletter-tipOfTheDay__title,
+.mkly-newsletter-poll__option {
+  color: var(--mkly-accent);
+}
+
+.mkly-core-button__link,
+.mkly-core-cta__button,
+.mkly-newsletter-outro__cta {
+  background: var(--mkly-accent);
+}`,
+  accentHover: `.mkly-document a:not([class]):hover,
+.mkly-core-card__link:hover,
+.mkly-newsletter-featured__link:hover,
+.mkly-newsletter-item__link:hover,
+.mkly-newsletter-sponsor__link:hover {
+  color: var(--mkly-accent-hover);
+}
+
+.mkly-core-button__link:hover,
+.mkly-core-cta__button:hover,
+.mkly-newsletter-outro__cta:hover {
+  background: var(--mkly-accent-hover);
+}`,
+  border: `.mkly-document hr,
+.mkly-document pre,
+.mkly-document th,
+.mkly-document td,
+.mkly-core-header,
+.mkly-core-footer,
+.mkly-core-section,
+.mkly-core-card,
+.mkly-core-code,
+.mkly-core-divider,
+.mkly-newsletter-featured,
+.mkly-newsletter-item,
+.mkly-newsletter-tools,
+.mkly-newsletter-recommendations,
+.mkly-newsletter-poll,
+.mkly-newsletter-sponsor,
+.mkly-newsletter-custom {
+  border-color: var(--mkly-border);
+}
+
+.mkly-core-divider {
+  background: var(--mkly-border);
+}`,
+  bg: `.mkly-document,
+.mkly-core-card,
+.mkly-newsletter-featured,
+.mkly-newsletter-item {
+  background: var(--mkly-bg);
+}`,
+  bgSubtle: `.mkly-core-hero,
+.mkly-core-code,
+.mkly-core-cta,
+.mkly-newsletter-quickHits,
+.mkly-newsletter-tools,
+.mkly-newsletter-recommendations,
+.mkly-newsletter-poll,
+.mkly-newsletter-community,
+.mkly-newsletter-custom {
+  background: var(--mkly-bg-subtle);
+}`,
+  buttonText: `.mkly-core-button__link,
+.mkly-core-cta__button,
+.mkly-newsletter-outro__cta {
+  color: var(--mkly-button-text);
+}`,
+  textAlign: `.mkly-document :is(p, li, h1, h2, h3, h4, h5, h6, blockquote),
+.mkly-core-heading,
+.mkly-core-text,
+.mkly-core-section__title,
+.mkly-core-header__title,
+.mkly-newsletter-category__title,
+.mkly-newsletter-quickHits__title,
+.mkly-newsletter-tools__title,
+.mkly-newsletter-recommendations__title,
+.mkly-newsletter-custom__title {
+  text-align: var(--mkly-text-align);
+}`,
+  fontSize: `.mkly-document {
+  font-size: var(--mkly-font-size);
+}`,
+  lineHeight: `.mkly-document :is(p, li, blockquote, td, th),
+.mkly-core-text,
+.mkly-newsletter-intro,
+.mkly-newsletter-featured p,
+.mkly-newsletter-item p,
+.mkly-newsletter-quickHits li,
+.mkly-newsletter-tools p,
+.mkly-newsletter-tipOfTheDay p,
+.mkly-newsletter-personalNote,
+.mkly-newsletter-recommendations li {
+  line-height: var(--mkly-line-height);
+}`,
+  fontBody: `.mkly-document {
+  font-family: var(--mkly-font-body);
+}`,
+  fontHeading: `.mkly-document :is(h1, h2, h3, h4, h5, h6),
+.mkly-core-heading,
+.mkly-core-section__title,
+.mkly-core-header__title,
+.mkly-newsletter-category__title,
+.mkly-newsletter-quickHits__title,
+.mkly-newsletter-tools__title,
+.mkly-newsletter-recommendations__title,
+.mkly-newsletter-custom__title {
+  font-family: var(--mkly-font-heading);
+}`,
+  fontMono: `.mkly-document code,
+.mkly-document pre,
+.mkly-core-code pre {
+  font-family: var(--mkly-font-mono);
+}`,
+};
+
+function buildGlobalTokenOverrideCSS(variableNames: ReadonlySet<string>): string {
+  const rules: string[] = [];
+  for (const name of variableNames) {
+    const rule = GLOBAL_TOKEN_OVERRIDE_RULES[name];
+    if (rule) rules.push(rule);
+  }
+  return rules.join('\n\n');
+}
+
 /** Convert a style property key to CSS property name. */
 export function cssProperty(key: string): string {
   return STYLE_ALIASES[key] ?? (key.includes('-') ? key : toKebab(key));
@@ -72,6 +243,21 @@ export function cssProperty(key: string): string {
 
 function safeCssValue(v: string): string {
   return v.replace(/<\//gi, '<\\/');
+}
+
+function toRem(pxValue: number): string {
+  if (pxValue === 0) return '0';
+  const rem = pxValue / 16;
+  const normalized = Number.parseFloat(rem.toFixed(4)).toString();
+  return `${normalized}rem`;
+}
+
+function normalizeCssUnits(css: string): string {
+  return css.replace(/(-?\d*\.?\d+)px\b/g, (_, value: string) => {
+    const px = Number.parseFloat(value);
+    if (!Number.isFinite(px)) return `${value}px`;
+    return toRem(px);
+  });
 }
 
 /** Resolve $variable references to var(--mkly-*) */
@@ -617,18 +803,25 @@ function parseTarget(target: string): { sub: string | null; pseudo: string | nul
  */
 export function compileStyleGraphToCSS(graph: StyleGraph): string {
   const cssLines: string[] = [];
+  const variableNames = new Set<string>();
 
   // Variables → .mkly-document { --mkly-*: value }
   if (graph.variables.length > 0) {
     const varLines: string[] = [];
     for (const v of graph.variables) {
+      variableNames.add(v.name);
       if (v.name in VARIABLE_TO_CSS) {
-        varLines.push(`  ${VARIABLE_TO_CSS[v.name]}: ${v.value};`);
+        varLines.push(`  ${VARIABLE_TO_CSS[v.name]}: ${resolveValue(v.value)};`);
       } else {
         varLines.push(`  ${resolveVariableName(v.name)}: ${resolveValue(v.value)};`);
       }
     }
     cssLines.push(`.mkly-document {\n${varLines.join('\n')}\n}`);
+
+    const globalOverrideCSS = buildGlobalTokenOverrideCSS(variableNames);
+    if (globalOverrideCSS) {
+      cssLines.push(globalOverrideCSS);
+    }
   }
 
   // Rules → CSS selectors
@@ -826,12 +1019,12 @@ export function compileLayeredCSS(
 
   // Kit layer
   const kitParts: string[] = [];
-  if (options.diagnosticCSS) kitParts.push(options.diagnosticCSS);
-  if (options.kitCSS && options.kitCSS.length > 0) kitParts.push(options.kitCSS.join('\n'));
+  if (options.diagnosticCSS) kitParts.push(normalizeCssUnits(options.diagnosticCSS));
+  if (options.kitCSS && options.kitCSS.length > 0) kitParts.push(normalizeCssUnits(options.kitCSS.join('\n')));
   if (options.kitKeyframes) {
     const kfEntries = Object.entries(options.kitKeyframes);
     if (kfEntries.length > 0) {
-      kitParts.push(kfEntries.map(([name, body]) => `@keyframes ${name}{${body}}`).join('\n'));
+      kitParts.push(normalizeCssUnits(kfEntries.map(([name, body]) => `@keyframes ${name}{${body}}`).join('\n')));
     }
   }
   if (kitParts.length > 0) {
@@ -840,7 +1033,7 @@ export function compileLayeredCSS(
 
   // Theme layer
   if (options.themeCSS && options.themeCSS.length > 0) {
-    parts.push(`@layer theme {\n${options.themeCSS.join('\n')}\n}`);
+    parts.push(`@layer theme {\n${normalizeCssUnits(options.themeCSS.join('\n'))}\n}`);
   }
 
   // Preset layer
@@ -849,13 +1042,13 @@ export function compileLayeredCSS(
   if (options.apiThemeCSS) presetParts.push(options.apiThemeCSS);
   if (options.blockContribCSS && options.blockContribCSS.length > 0) presetParts.push(...options.blockContribCSS);
   if (presetParts.length > 0) {
-    parts.push(`@layer preset {\n${presetParts.join('\n')}\n}`);
+    parts.push(`@layer preset {\n${normalizeCssUnits(presetParts.join('\n'))}\n}`);
   }
 
   // User layer (from StyleGraph — document --- style blocks)
   const userCSS = compileStyleGraphToCSS(graph);
   if (userCSS) {
-    parts.push(`@layer user {\n${userCSS}\n}`);
+    parts.push(`@layer user {\n${normalizeCssUnits(userCSS)}\n}`);
   }
 
   return parts.join('\n\n');

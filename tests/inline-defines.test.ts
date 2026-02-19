@@ -299,7 +299,7 @@ title: Test
 url: https://example.com
 
 Content`);
-      expect(result).toContain('border-radius: 20px');
+      expect(result).toContain('border-radius: 1.25rem');
     });
 
     it('should not apply inline preset if not activated', () => {
@@ -335,7 +335,7 @@ title: Test
 url: https://example.com
 
 Content`);
-      expect(result).toContain('border-radius: 99px');
+      expect(result).toContain('border-radius: 6.1875rem');
     });
 
     it('should not produce error for activated inline preset', () => {
@@ -397,7 +397,7 @@ url: https://example.com
 
 Content`);
     expect(result).toContain('--mkly-accent: #e2725b');
-    expect(result).toContain('border-radius: 20px');
+    expect(result).toContain('border-radius: 1.25rem');
   });
 
   it('should apply inline preset after inline theme (preset wins)', () => {
@@ -422,8 +422,8 @@ url: https://example.com
 
 Content`);
     const css = result.match(/<style>([\s\S]*?)<\/style>/)?.[1] ?? '';
-    const lastRound = css.lastIndexOf('border-radius: 20px');
-    const themed = css.lastIndexOf('border-radius: 4px');
+    const lastRound = css.lastIndexOf('border-radius: 1.25rem');
+    const themed = css.lastIndexOf('border-radius: 0.25rem');
     expect(lastRound).toBeGreaterThan(themed);
   });
 
