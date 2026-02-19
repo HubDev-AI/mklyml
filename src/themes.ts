@@ -11,8 +11,6 @@ const THEME_COLOR_CSS = `
 .mkly-document a:not([class]):hover { color: var(--mkly-accent-hover); }
 .mkly-document h1, .mkly-document h2, .mkly-document h3,
 .mkly-document h4, .mkly-document h5, .mkly-document h6 { color: var(--mkly-text); }
-.mkly-document strong { color: var(--mkly-text); }
-.mkly-document em { color: var(--mkly-text); }
 .mkly-document blockquote { color: var(--mkly-muted); }
 .mkly-document hr { border-color: var(--mkly-border); }
 .mkly-document code:not(pre code) { background: var(--mkly-code-bg); color: var(--mkly-text); }

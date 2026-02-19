@@ -514,15 +514,14 @@ describe('compileStyleGraphToCSS', () => {
     expect(css).toContain(':is(p, li, h1');
   });
 
-  it('does NOT propagate inherited properties for tag targets', () => {
+  it('propagates inherited properties for tag targets', () => {
     const graph: StyleGraph = {
       variables: [],
       rules: [{ blockType: 'core/text', target: '>p', properties: { color: 'blue' } }],
     };
     const css = compileStyleGraphToCSS(graph);
     expect(css).toContain('.mkly-core-text p');
-    // Should NOT have :is() propagation for tag targets
-    expect(css).not.toContain(':is(');
+    expect(css).toContain('.mkly-core-text p :is(');
   });
 
   it('emits user-defined variables as --mkly-* custom properties', () => {
@@ -557,6 +556,7 @@ describe('compileStyleGraphToCSS', () => {
     expect(css).toContain('--mkly-text: #111111');
     expect(css).toContain('.mkly-core-heading');
     expect(css).toContain('color: var(--mkly-text);');
+    expect(css).not.toContain('strong, em');
   });
 
   it('emits global typography bridges for fontSize and lineHeight variables', () => {
