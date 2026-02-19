@@ -29,6 +29,8 @@ export interface StylePropertyDef {
   scale?: number;
   /** Placeholder text for 'text' type */
   placeholder?: string;
+  /** Marks dense/rare options that should be hidden behind "More options" by default. */
+  advanced?: boolean;
 }
 
 export interface StyleSector {
@@ -69,6 +71,24 @@ const OVERFLOW_OPTIONS: StylePreset[] = [
   { label: 'visible', value: 'visible' },
 ];
 
+const ALIGN_ITEMS_OPTIONS: StylePreset[] = [
+  { label: 'Default', value: '' },
+  { label: 'stretch', value: 'stretch' },
+  { label: 'start', value: 'start' },
+  { label: 'center', value: 'center' },
+  { label: 'end', value: 'end' },
+  { label: 'baseline', value: 'baseline' },
+];
+
+const OBJECT_FIT_OPTIONS: StylePreset[] = [
+  { label: 'Default', value: '' },
+  { label: 'cover', value: 'cover' },
+  { label: 'contain', value: 'contain' },
+  { label: 'fill', value: 'fill' },
+  { label: 'none', value: 'none' },
+  { label: 'scale-down', value: 'scale-down' },
+];
+
 import { GOOGLE_FONTS } from './google-fonts';
 
 const FONT_FAMILY_OPTIONS: StylePreset[] = [
@@ -87,7 +107,16 @@ const FONT_FAMILY_OPTIONS: StylePreset[] = [
 
 const FONT_SIZE_OPTIONS: StylePreset[] = [
   { label: 'Default', value: '' },
-  ...['12', '14', '16', '18', '20', '24', '28', '32', '40', '48'].map(s => ({ label: `${s}px`, value: `${s}px` })),
+  { label: '0.75rem', value: '0.75rem' },
+  { label: '0.875rem', value: '0.875rem' },
+  { label: '1rem', value: '1rem' },
+  { label: '1.125rem', value: '1.125rem' },
+  { label: '1.25rem', value: '1.25rem' },
+  { label: '1.5rem', value: '1.5rem' },
+  { label: '1.75rem', value: '1.75rem' },
+  { label: '2rem', value: '2rem' },
+  { label: '2.5rem', value: '2.5rem' },
+  { label: '3rem', value: '3rem' },
 ];
 
 const FONT_WEIGHT_OPTIONS: StylePreset[] = [
@@ -109,11 +138,11 @@ const BORDER_STYLE_OPTIONS: StylePreset[] = [
 
 const SHADOW_PRESETS: StylePreset[] = [
   { label: 'None', value: '' },
-  { label: 'Subtle', value: '0 1px 3px rgba(0,0,0,0.12)' },
-  { label: 'Small', value: '0 2px 8px rgba(0,0,0,0.15)' },
-  { label: 'Medium', value: '0 4px 16px rgba(0,0,0,0.12)' },
-  { label: 'Large', value: '0 8px 32px rgba(0,0,0,0.15)' },
-  { label: 'XL', value: '0 16px 48px rgba(0,0,0,0.2)' },
+  { label: 'Subtle', value: '0 0.0625rem 0.1875rem rgba(0,0,0,0.12)' },
+  { label: 'Small', value: '0 0.125rem 0.5rem rgba(0,0,0,0.15)' },
+  { label: 'Medium', value: '0 0.25rem 1rem rgba(0,0,0,0.12)' },
+  { label: 'Large', value: '0 0.5rem 2rem rgba(0,0,0,0.15)' },
+  { label: 'XL', value: '0 1rem 3rem rgba(0,0,0,0.2)' },
 ];
 
 const ANIMATION_PRESETS: StylePreset[] = [
@@ -150,8 +179,8 @@ const HOVER_TRANSFORM_OPTIONS: StylePreset[] = [
   { label: 'None', value: '' },
   { label: 'Grow', value: 'scale(1.05)' },
   { label: 'Shrink', value: 'scale(0.95)' },
-  { label: 'Lift', value: 'translateY(-2px)' },
-  { label: 'Push', value: 'translateY(1px)' },
+  { label: 'Lift', value: 'translateY(-0.125rem)' },
+  { label: 'Push', value: 'translateY(0.0625rem)' },
 ];
 
 const HOVER_OPACITY_OPTIONS: StylePreset[] = [
@@ -163,9 +192,9 @@ const HOVER_OPACITY_OPTIONS: StylePreset[] = [
 
 const HOVER_SHADOW_PRESETS: StylePreset[] = [
   { label: 'None', value: '' },
-  { label: 'Medium', value: '0 4px 16px rgba(0,0,0,0.15)' },
-  { label: 'Large', value: '0 8px 32px rgba(0,0,0,0.2)' },
-  { label: 'XL', value: '0 16px 48px rgba(0,0,0,0.25)' },
+  { label: 'Medium', value: '0 0.25rem 1rem rgba(0,0,0,0.15)' },
+  { label: 'Large', value: '0 0.5rem 2rem rgba(0,0,0,0.2)' },
+  { label: 'XL', value: '0 1rem 3rem rgba(0,0,0,0.25)' },
 ];
 
 // ---------------------------------------------------------------------------
@@ -176,10 +205,12 @@ export const LAYOUT_SECTOR: StyleSector = {
   id: 'layout',
   label: 'Layout',
   properties: [
-    { name: 'display', label: 'Display', type: 'select', options: DISPLAY_OPTIONS },
+    { name: 'display', label: 'Display', type: 'select', options: DISPLAY_OPTIONS, advanced: true },
     { name: 'text-align', label: 'Align', type: 'alignment' },
-    { name: 'cursor', label: 'Cursor', type: 'select', options: CURSOR_OPTIONS },
-    { name: 'overflow', label: 'Overflow', type: 'select', options: OVERFLOW_OPTIONS },
+    { name: 'align-items', label: 'Items', type: 'select', options: ALIGN_ITEMS_OPTIONS, advanced: true },
+    { name: 'grid-template-columns', label: 'Grid Cols', type: 'text', placeholder: 'e.g. 1fr 1fr', advanced: true },
+    { name: 'cursor', label: 'Cursor', type: 'select', options: CURSOR_OPTIONS, advanced: true },
+    { name: 'overflow', label: 'Overflow', type: 'select', options: OVERFLOW_OPTIONS, advanced: true },
   ],
 };
 
@@ -188,10 +219,10 @@ export const SIZING_SECTOR: StyleSector = {
   label: 'Sizing',
   properties: [
     { name: 'width', label: 'Width', type: 'text', placeholder: 'e.g. 100%' },
-    { name: 'height', label: 'Height', type: 'text', placeholder: 'e.g. 40px' },
-    { name: 'max-width', label: 'Max Width', type: 'text', placeholder: 'e.g. 600px' },
-    { name: 'min-height', label: 'Min Height', type: 'text', placeholder: 'e.g. 200px' },
-    { name: 'gap', label: 'Gap', type: 'text', placeholder: 'e.g. 16px' },
+    { name: 'height', label: 'Height', type: 'text', placeholder: 'e.g. 2.5rem' },
+    { name: 'max-width', label: 'Max Width', type: 'text', placeholder: 'e.g. 37.5rem', advanced: true },
+    { name: 'min-height', label: 'Min Height', type: 'text', placeholder: 'e.g. 12.5rem', advanced: true },
+    { name: 'gap', label: 'Gap', type: 'text', placeholder: 'e.g. 1rem', advanced: true },
   ],
 };
 
@@ -229,10 +260,10 @@ export const BORDER_SECTOR: StyleSector = {
   id: 'border',
   label: 'Border',
   properties: [
-    { name: 'border-width', label: 'Width', type: 'text', placeholder: '0px' },
+    { name: 'border-width', label: 'Width', type: 'text', placeholder: '0rem' },
     { name: 'border-style', label: 'Style', type: 'select', options: BORDER_STYLE_OPTIONS },
     { name: 'border-color', label: 'Color', type: 'color' },
-    { name: 'border-radius', label: 'Radius', type: 'text', placeholder: '0px' },
+    { name: 'border-radius', label: 'Radius', type: 'text', placeholder: '0rem' },
   ],
 };
 
@@ -242,7 +273,7 @@ export const EFFECTS_SECTOR: StyleSector = {
   properties: [
     { name: 'opacity', label: 'Opacity', type: 'slider', min: 0, max: 100, scale: 100 },
     { name: 'box-shadow', label: 'Shadow', type: 'select', options: SHADOW_PRESETS },
-    { name: 'transform', label: 'Transform', type: 'text', placeholder: 'e.g. rotate(5deg)' },
+    { name: 'transform', label: 'Transform', type: 'text', placeholder: 'e.g. rotate(5deg)', advanced: true },
   ],
 };
 
@@ -272,8 +303,11 @@ export const TARGET_SECTORS: StyleSector[] = [
     id: 'target-layout',
     label: 'Layout',
     properties: [
-      { name: 'display', label: 'Display', type: 'select', options: DISPLAY_OPTIONS },
+      { name: 'display', label: 'Display', type: 'select', options: DISPLAY_OPTIONS, advanced: true },
       { name: 'text-align', label: 'Align', type: 'alignment' },
+      { name: 'align-items', label: 'Items', type: 'select', options: ALIGN_ITEMS_OPTIONS, advanced: true },
+      { name: 'grid-template-columns', label: 'Grid Cols', type: 'text', placeholder: 'e.g. 1fr 1fr', advanced: true },
+      { name: 'overflow', label: 'Overflow', type: 'select', options: OVERFLOW_OPTIONS, advanced: true },
     ],
   },
   {
@@ -281,8 +315,10 @@ export const TARGET_SECTORS: StyleSector[] = [
     label: 'Sizing',
     properties: [
       { name: 'width', label: 'Width', type: 'text', placeholder: 'e.g. 100%' },
-      { name: 'max-width', label: 'Max W', type: 'text', placeholder: 'e.g. 600px' },
+      { name: 'max-width', label: 'Max W', type: 'text', placeholder: 'e.g. 37.5rem', advanced: true },
       { name: 'height', label: 'Height', type: 'text', placeholder: 'e.g. auto' },
+      { name: 'aspect-ratio', label: 'Aspect', type: 'text', placeholder: 'e.g. 16 / 9', advanced: true },
+      { name: 'object-fit', label: 'Fit', type: 'select', options: OBJECT_FIT_OPTIONS, advanced: true },
       { name: 'margin', label: 'Margin', type: 'spacing' },
       { name: 'padding', label: 'Padding', type: 'spacing' },
     ],
@@ -304,12 +340,12 @@ export const TARGET_SECTORS: StyleSector[] = [
     label: 'Appearance',
     properties: [
       { name: 'background', label: 'Bg', type: 'color' },
-      { name: 'border-radius', label: 'Radius', type: 'text', placeholder: 'e.g. 8px' },
-      { name: 'border-width', label: 'Border W', type: 'text', placeholder: '0px' },
-      { name: 'border-style', label: 'Border S', type: 'select', options: BORDER_STYLE_OPTIONS },
-      { name: 'border-color', label: 'Border C', type: 'color' },
+      { name: 'border-radius', label: 'Radius', type: 'text', placeholder: 'e.g. 0.5rem' },
+      { name: 'border-width', label: 'Border W', type: 'text', placeholder: '0rem', advanced: true },
+      { name: 'border-style', label: 'Border S', type: 'select', options: BORDER_STYLE_OPTIONS, advanced: true },
+      { name: 'border-color', label: 'Border C', type: 'color', advanced: true },
       { name: 'opacity', label: 'Opacity', type: 'slider', min: 0, max: 100, scale: 100 },
-      { name: 'box-shadow', label: 'Shadow', type: 'select', options: SHADOW_PRESETS },
+      { name: 'box-shadow', label: 'Shadow', type: 'select', options: SHADOW_PRESETS, advanced: true },
     ],
   },
 ];
@@ -325,6 +361,120 @@ export const DEFAULT_SELF_SECTORS: StyleSector[] = [
   EFFECTS_SECTOR,
   ANIMATION_SECTOR,
 ];
+
+const TAG_TARGET_PROFILES: Record<string, string[]> = {
+  p: ['color', 'font-family', 'font-size', 'font-weight', 'font-style', 'line-height', 'text-align', 'margin', 'padding', 'background', 'border-radius', 'opacity'],
+  li: ['color', 'font-family', 'font-size', 'font-weight', 'font-style', 'line-height', 'text-align', 'margin', 'padding', 'background', 'border-radius', 'opacity'],
+  blockquote: ['color', 'font-family', 'font-size', 'font-weight', 'font-style', 'line-height', 'text-align', 'margin', 'padding', 'background', 'border-radius', 'opacity'],
+  span: ['color', 'font-family', 'font-size', 'font-weight', 'font-style', 'line-height', 'background'],
+  strong: ['color', 'font-family', 'font-size', 'font-weight', 'font-style', 'line-height', 'background'],
+  em: ['color', 'font-family', 'font-size', 'font-weight', 'font-style', 'line-height', 'background'],
+  a: ['color', 'font-family', 'font-size', 'font-weight', 'line-height', 'padding', 'margin', 'background', 'border-radius', 'border-width', 'border-style', 'border-color', 'opacity'],
+  img: ['width', 'max-width', 'height', 'aspect-ratio', 'object-fit', 'margin', 'padding', 'border-radius', 'border-width', 'border-style', 'border-color', 'opacity', 'box-shadow'],
+  code: ['color', 'font-family', 'font-size', 'font-weight', 'background', 'padding', 'border-radius', 'opacity'],
+  pre: ['color', 'font-family', 'font-size', 'line-height', 'background', 'padding', 'margin', 'border-radius', 'border-width', 'border-style', 'border-color', 'overflow', 'opacity', 'box-shadow'],
+  hr: ['width', 'max-width', 'height', 'background', 'margin', 'opacity'],
+};
+
+const HEADING_TAG_RE = /^h[1-6]$/;
+
+const HEADING_TARGET_PROFILE = [
+  'color', 'font-family', 'font-size', 'font-weight', 'font-style', 'line-height',
+  'text-align', 'margin', 'padding', 'background',
+  'border-radius', 'border-width', 'border-style', 'border-color', 'opacity',
+];
+
+export interface ResolveStyleSectorsInput {
+  target: string;
+  styleHints?: Record<string, string[]>;
+  /** Exact selected descendant tag (used for class-scoped targets like `>.s1`) */
+  targetTag?: string;
+}
+
+export interface ResolvedStyleSectors {
+  sectors: StyleSector[];
+  rawSectors: StyleSector[];
+  source: 'default' | 'hints' | 'tag-profile';
+  allowedProps?: string[];
+  unsupportedHintProps: string[];
+}
+
+function filterSectorsByProps(sectors: StyleSector[], allowed: string[]): StyleSector[] {
+  const set = new Set(allowed);
+  const result: StyleSector[] = [];
+  for (const sector of sectors) {
+    const filtered = sector.properties.filter((prop) => set.has(prop.name));
+    if (filtered.length === 0) continue;
+    result.push(filtered.length === sector.properties.length ? sector : { ...sector, properties: filtered });
+  }
+  return result;
+}
+
+function extractTagName(target: string, targetTag?: string): string | undefined {
+  if (targetTag) return targetTag.toLowerCase();
+  if (!target.startsWith('>')) return undefined;
+  const raw = target.slice(1);
+  if (raw.startsWith('.')) return undefined;
+  const cleaned = raw
+    .replace(/:nth-of-type\(\d+\)/g, '')
+    .replace(/:[a-z-]+$/g, '')
+    .trim()
+    .toLowerCase();
+  return cleaned || undefined;
+}
+
+function resolveTagProfile(tag: string): string[] | undefined {
+  if (HEADING_TAG_RE.test(tag)) return HEADING_TARGET_PROFILE;
+  return TAG_TARGET_PROFILES[tag];
+}
+
+/** Resolve the editable style sectors for a specific scope/tab. */
+export function resolveStyleSectors(input: ResolveStyleSectorsInput): ResolvedStyleSectors {
+  const { target, styleHints, targetTag } = input;
+  const isSelf = target === 'self';
+  const isHover = target === 'self:hover';
+  const isTagTarget = target.startsWith('>');
+
+  const rawSectors = isHover
+    ? [HOVER_SECTOR]
+    : isSelf
+      ? DEFAULT_SELF_SECTORS
+      : TARGET_SECTORS;
+
+  let allowedProps: string[] | undefined;
+  let source: 'default' | 'hints' | 'tag-profile' = 'default';
+
+  if (isSelf) {
+    allowedProps = styleHints?.['self'];
+    if (allowedProps) source = 'hints';
+  } else if (isHover) {
+    allowedProps = styleHints?.['self:hover'];
+    if (allowedProps) source = 'hints';
+  } else if (isTagTarget) {
+    allowedProps = styleHints?.['>'];
+    if (allowedProps) {
+      source = 'hints';
+    } else {
+      const tag = extractTagName(target, targetTag);
+      if (tag) {
+        const profile = resolveTagProfile(tag);
+        if (profile) {
+          allowedProps = profile;
+          source = 'tag-profile';
+        }
+      }
+    }
+  } else {
+    allowedProps = styleHints?.[target];
+    if (allowedProps) source = 'hints';
+  }
+
+  const rawPropNames = new Set(rawSectors.flatMap((sector) => sector.properties.map((prop) => prop.name)));
+  const unsupportedHintProps = (allowedProps ?? []).filter((prop) => !rawPropNames.has(prop));
+  const sectors = allowedProps ? filterSectorsByProps(rawSectors, allowedProps) : rawSectors;
+
+  return { sectors, rawSectors, source, allowedProps, unsupportedHintProps };
+}
 
 /** All style property names used across all sectors (for completions) */
 export function getAllStylePropertyNames(): string[] {
