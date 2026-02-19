@@ -65,12 +65,14 @@ const INHERITED_CSS_PROPS = new Set([
   'text-indent', 'word-spacing',
 ]);
 
+const INHERITED_TEXT_DESCENDANT_SELECTOR = ':is(p, li, h1, h2, h3, h4, h5, h6, blockquote, a, span, code, mark)';
+
 // When users set document-level style variables (--- style text/bg/accent/etc),
 // emit user-layer selector overrides so these globals can win over hardcoded
 // theme/preset rawCss colors across all kits.
 const GLOBAL_TOKEN_OVERRIDE_RULES: Record<string, string> = {
   text: `.mkly-document,
-.mkly-document :is(p, li, h1, h2, h3, h4, h5, h6, strong, em),
+.mkly-document :is(p, li, h1, h2, h3, h4, h5, h6),
 .mkly-core-heading,
 .mkly-core-text,
 .mkly-core-code pre,
@@ -839,7 +841,6 @@ export function compileStyleGraphToCSS(graph: StyleGraph): string {
 
     const selector = resolveSelector(rule.target, rule.blockType, rule.label);
     const isSubElement = rule.target !== 'self' && !rule.target.startsWith('self:');
-    const isTagTarget = rule.target.startsWith('>');
 
     const props = Object.entries(rule.properties)
       .map(([k, v]) => `  ${cssProperty(k)}: ${resolveValue(v)};`)
@@ -847,16 +848,15 @@ export function compileStyleGraphToCSS(graph: StyleGraph): string {
     if (props) {
       cssLines.push(`${selector} {\n${props}\n}`);
 
-      // For BEM sub-element targets: propagate inherited properties to child text
+      // For all non-self targets: propagate inherited properties to child text
       // elements so they override theme rawCss rules like `.mkly-document p`.
-      // Skip for tag targets — they already target specific tags directly.
-      if (isSubElement && !isTagTarget) {
+      if (isSubElement) {
         const inheritedProps = Object.entries(rule.properties)
           .filter(([k]) => INHERITED_CSS_PROPS.has(cssProperty(k)))
           .map(([k, v]) => `  ${cssProperty(k)}: ${resolveValue(v)};`)
           .join('\n');
         if (inheritedProps) {
-          cssLines.push(`${selector} :is(p, li, h1, h2, h3, h4, h5, h6, blockquote) {\n${inheritedProps}\n}`);
+          cssLines.push(`${selector} ${INHERITED_TEXT_DESCENDANT_SELECTOR} {\n${inheritedProps}\n}`);
         }
       }
 
