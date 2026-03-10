@@ -1,6 +1,6 @@
 {
   "name": "@mklyml/core",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "license": "PolyForm-Noncommercial-1.0.0",
   "description": "A human-readable, AI-friendly markup language that compiles to HTML",
   "type": "module",
