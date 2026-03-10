@@ -22,7 +22,7 @@
     "test": "bun test"
   },
   "devDependencies": {
-    "@mklyml/kits": "^0.2.0",
+    "@mklyml/kits": ">=0.1.0",
     "@types/bun": "latest",
     "tsup": "8.5.1",
     "typescript": "5.8.2"
