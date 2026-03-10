@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'bun:test';
 import { mkly, CORE_KIT, htmlToMkly } from '../src/index';
-import { NEWSLETTER_KIT } from '../../mkly-kits/newsletter/src';
+import { NEWSLETTER_KIT } from '@mklyml/kits/newsletter';
 
 const KITS = { core: CORE_KIT, newsletter: NEWSLETTER_KIT };
 
