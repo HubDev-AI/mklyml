@@ -5,3 +5,10 @@ node_modules
 dist
 
 .entire/
+
+# Local tooling artifacts
+.memsearch/
+.playwright-mcp/
+playwright-report/
+test-results/
+.last-run.json
