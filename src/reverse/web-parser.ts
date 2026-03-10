@@ -2,6 +2,7 @@ import { htmlToMarkdown } from './html-to-markdown';
 import { normalizeHtmlIndent } from './generic-parser';
 import { extractMklyMeta } from './utils';
 import {
+  decodeHtmlEntities,
   escapeRegex,
   extractAttr,
   findTagWithClass,
@@ -153,7 +154,7 @@ export function parseCoreBlock(blockHtml: string, blockType: string): ParsedBloc
       const levelMatch = blockHtml.match(/mkly-core-heading--(\d)/);
       if (levelMatch) block.properties.level = levelMatch[1];
       const textMatch = blockHtml.match(/<h\d[^>]*>([\s\S]*?)<\/h\d>/);
-      if (textMatch) block.content = textMatch[1].replace(/<[^>]+>/g, '').trim();
+      if (textMatch) block.content = decodeHtmlEntities(textMatch[1].replace(/<[^>]+>/g, '').trim());
       break;
     }
     case 'core/text': {
@@ -162,13 +163,23 @@ export function parseCoreBlock(blockHtml: string, blockType: string): ParsedBloc
       break;
     }
     case 'core/html': {
-      block.content = normalizeHtmlIndent(
-        blockHtml
-          .replace(/\s*mkly-core-html/g, '')
-          .replace(/\s+class="\s*"/g, '')
-          .replace(/\s+data-mkly-[\w-]+(?:="[^"]*")?/g, '')
-          .trim(),
-      );
+      let cleaned = blockHtml
+        .replace(/\s*mkly-core-html(?:--\w+)*/g, '')
+        .replace(/\s+class="\s*"/g, '')
+        .replace(/\s+data-mkly-[\w-]+(?:="[^"]*")?/g, '')
+        .trim();
+      // Unwrap bare <div> wrapper added by the compiler for plain-text content.
+      // The compiler wraps non-HTML content in <div class="mkly-core-html">, and
+      // after stripping that class we get <div>text</div>. Unwrap to just text
+      // so the round-trip is stable. Only safe when inner content is text (no leading tag).
+      const bareDivMatch = cleaned.match(/^<div>([\s\S]*)<\/div>$/);
+      if (bareDivMatch) {
+        const inner = bareDivMatch[1].trim();
+        if (inner && !/^<\w/.test(inner)) {
+          cleaned = inner;
+        }
+      }
+      block.content = normalizeHtmlIndent(cleaned);
       block.verbatim = true;
       break;
     }
@@ -184,9 +195,10 @@ export function parseCoreBlock(blockHtml: string, blockType: string): ParsedBloc
     case 'core/button': {
       const href = extractAttr(blockHtml, 'href');
       const linkTag = findTagWithClass(blockHtml, 'mkly-core-button__link');
-      const label = linkTag
+      const labelRaw = linkTag
         ? blockHtml.match(/mkly-core-button__link[^>]*>([\s\S]*?)<\/a>/)?.[1]?.replace(/<[^>]+>/g, '').trim()
         : undefined;
+      const label = labelRaw ? decodeHtmlEntities(labelRaw) : undefined;
       if (href) block.properties.url = href;
       if (label) block.properties.label = label;
       break;
@@ -206,7 +218,7 @@ export function parseCoreBlock(blockHtml: string, blockType: string): ParsedBloc
     }
     case 'core/quote': {
       const authorMatch = blockHtml.match(/mkly-core-quote__author[^>]*>\u2014\s*([^<]*)<\/footer>/);
-      if (authorMatch) block.properties.author = authorMatch[1].trim();
+      if (authorMatch) block.properties.author = decodeHtmlEntities(authorMatch[1].trim());
       const content = blockHtml.match(/<blockquote[^>]*>([\s\S]*?)(?:<footer|<\/blockquote>)/);
       if (content) block.content = htmlToMarkdown(content[1]);
       break;
@@ -276,7 +288,7 @@ export function parseCoreBlock(blockHtml: string, blockType: string): ParsedBloc
         const href = extractAttrFromTag(ctaTag, 'href');
         if (href) block.properties.url = href;
         const labelMatch = blockHtml.match(/mkly-core-cta__button[^>]*>([\s\S]*?)<\/a>/);
-        if (labelMatch) block.properties.buttonText = labelMatch[1].replace(/<[^>]+>/g, '').trim();
+        if (labelMatch) block.properties.buttonText = decodeHtmlEntities(labelMatch[1].replace(/<[^>]+>/g, '').trim());
       }
       // Extract content before the CTA button
       const ctaInner = extractInnerHtml(blockHtml, 'mkly-core-cta');
@@ -486,11 +498,36 @@ export function reverseWeb(html: string, options?: ReverseWebOptions): string {
     }
   }
 
-  // Extract content from mkly-document div
+  // Extract content from mkly-document element using depth-aware matching.
+  // The simple greedy regex was buggy: `[\s\S]+` with end-anchor `$` would capture
+  // past the real closing tag when the document was wrapped in an outer element.
   let content = html;
-  const docMatch = html.match(/class="mkly-document"[^>]*>([\s\S]+)<\/(?:main|div)>\s*$/);
-  if (docMatch) {
-    content = docMatch[1];
+  const docOpenMatch = html.match(/<(main|div)\s[^>]*class="mkly-document"[^>]*>/);
+  if (docOpenMatch) {
+    const tag = docOpenMatch[1]; // "main" or "div"
+    const afterOpen = docOpenMatch.index! + docOpenMatch[0].length;
+    // Find matching close tag via depth tracking
+    const openRe = new RegExp(`<${tag}[\\s>]`, 'gi');
+    const closeRe = new RegExp(`</${tag}>`, 'gi');
+    let depth = 1;
+    let pos = afterOpen;
+    while (depth > 0 && pos < html.length) {
+      openRe.lastIndex = pos;
+      closeRe.lastIndex = pos;
+      const nextOpen = openRe.exec(html);
+      const nextClose = closeRe.exec(html);
+      if (!nextClose) break; // malformed HTML
+      if (nextOpen && nextOpen.index < nextClose.index) {
+        depth++;
+        pos = nextOpen.index + nextOpen[0].length;
+      } else {
+        depth--;
+        if (depth === 0) {
+          content = html.slice(afterOpen, nextClose.index);
+        }
+        pos = nextClose.index + nextClose[0].length;
+      }
+    }
   }
 
   // Extract preserved comments (<!-- mkly-c: text -->) and their positions in content

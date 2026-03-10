@@ -8,8 +8,7 @@ describe('parser', () => {
       const doc = parse('');
       expect(doc.blocks).toHaveLength(0);
       expect(doc.meta).toEqual({});
-      expect(doc.errors).toHaveLength(1);
-      expect(doc.errors[0].message).toContain('Missing required');
+      expect(doc.errors).toHaveLength(0);
     });
 
     it('should parse only blank lines', () => {

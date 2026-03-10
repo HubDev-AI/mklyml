@@ -283,4 +283,21 @@ describe('reverse web parser', () => {
       expect(fatalErrors).toHaveLength(0);
     });
   });
+
+  describe('reverseWeb — document extraction edge cases', () => {
+    it('should not leak sibling content when mkly-document is wrapped', () => {
+      const innerHtml = '<div class="mkly-core-text" data-mkly-line="5"><p>Hello</p></div>';
+      const wrappedHtml = `<div class="outer"><div class="mkly-document">${innerHtml}</div><div class="sidebar">sidebar content</div></div>`;
+      const reversed = htmlToMkly(wrappedHtml);
+      expect(reversed).toContain('Hello');
+      expect(reversed).not.toContain('sidebar');
+    });
+
+    it('should handle mkly-document as main element', () => {
+      const html = '<main class="mkly-document" style="max-width:600px;margin:0 auto;"><div class="mkly-core-text"><p>Content</p></div></main>';
+      const reversed = htmlToMkly(html);
+      expect(reversed).toContain('--- core/text');
+      expect(reversed).toContain('Content');
+    });
+  });
 });

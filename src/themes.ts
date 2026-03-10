@@ -11,8 +11,6 @@ const THEME_COLOR_CSS = `
 .mkly-document a:not([class]):hover { color: var(--mkly-accent-hover); }
 .mkly-document h1, .mkly-document h2, .mkly-document h3,
 .mkly-document h4, .mkly-document h5, .mkly-document h6 { color: var(--mkly-text); }
-.mkly-document strong { color: var(--mkly-text); }
-.mkly-document em { color: var(--mkly-text); }
 .mkly-document blockquote { color: var(--mkly-muted); }
 .mkly-document hr { border-color: var(--mkly-border); }
 .mkly-document code:not(pre code) { background: var(--mkly-code-bg); color: var(--mkly-text); }
@@ -90,12 +88,13 @@ export const CORE_THEMES: MklyTheme[] = [
     displayName: 'Core/Default',
     description: 'No colors — inherits from browser, only sets fonts and spacing',
     variables: {
-      radius: '8px',
+      radius: '0.5rem',
       fontBody: "-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif",
       fontHeading: "-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif",
       fontMono: "'SF Mono', 'Fira Code', 'JetBrains Mono', monospace",
-      spacing: '24px',
+      spacing: '1.5rem',
     },
+    rawCss: THEME_COLOR_CSS,
   },
   {
     name: 'light',
@@ -111,11 +110,11 @@ export const CORE_THEMES: MklyTheme[] = [
       bgSubtle: '#ffffff',
       buttonText: '#ffffff',
       codeBg: '#f5f5f5',
-      radius: '8px',
+      radius: '0.5rem',
       fontBody: "-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif",
       fontHeading: "-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif",
       fontMono: "'SF Mono', 'Fira Code', 'JetBrains Mono', monospace",
-      spacing: '24px',
+      spacing: '1.5rem',
     },
     rawCss: THEME_COLOR_CSS,
   },
@@ -133,11 +132,11 @@ export const CORE_THEMES: MklyTheme[] = [
       bgSubtle: '#000000',
       buttonText: '#000000',
       codeBg: '#111111',
-      radius: '8px',
+      radius: '0.5rem',
       fontBody: "-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif",
       fontHeading: "-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif",
       fontMono: "'SF Mono', 'Fira Code', 'JetBrains Mono', monospace",
-      spacing: '24px',
+      spacing: '1.5rem',
     },
     rawCss: THEME_COLOR_CSS,
   },

@@ -42,6 +42,7 @@ export interface CompletionData {
   targets: Map<string, Record<string, TargetInfo>>;
   styleHints: Map<string, Record<string, string[]>>;
   styleProperties: CompletionItem[];
+  contentModes: Map<string, string>;
 }
 
 function unwrapZodType(zodType: unknown): unknown {
@@ -209,6 +210,7 @@ export function createCompletionData(
   const kitInfoMap = new Map<string, KitInfo>();
   const targetsMap = new Map<string, Record<string, TargetInfo>>();
   const styleHintsMap = new Map<string, Record<string, string[]>>();
+  const contentModesMap = new Map<string, string>();
   const seenMeta = new Set<string>();
   const metaProperties: MetaProperty[] = [];
   if (kits) {
@@ -231,6 +233,9 @@ export function createCompletionData(
           }
           if (block.styleHints) {
             styleHintsMap.set(qualified, block.styleHints);
+          }
+          if (block.contentMode) {
+            contentModesMap.set(qualified, block.contentMode);
           }
         }
       }
@@ -303,5 +308,6 @@ export function createCompletionData(
     targets: targetsMap,
     styleHints: styleHintsMap,
     styleProperties: stylePropertyItems,
+    contentModes: contentModesMap,
   };
 }

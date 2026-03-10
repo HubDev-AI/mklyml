@@ -66,10 +66,10 @@ describe('AI validation', () => {
       expect(result.document).toBeDefined();
     });
 
-    it('should error when version is missing', () => {
+    it('should succeed when version is missing (defaults to 1)', () => {
       const result = validateMklyOutput('--- use: core\n\n--- core/text\n\nHello world');
-      expect(result.valid).toBe(false);
-      expect(result.errors.some(e => e.message.includes('Missing required'))).toBe(true);
+      expect(result.valid).toBe(true);
+      expect(result.errors.filter(e => e.severity === 'error')).toHaveLength(0);
     });
 
     it('should return the parsed document', () => {
@@ -142,8 +142,7 @@ describe('AI validation', () => {
 
     it('should handle empty input', () => {
       const result = validateMklyOutput('');
-      expect(result.valid).toBe(false);
-      expect(result.errors.some(e => e.message.includes('Missing required'))).toBe(true);
+      expect(result.valid).toBe(true);
       expect(result.document).toBeDefined();
     });
 

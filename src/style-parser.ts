@@ -45,6 +45,9 @@ export const VARIABLE_TO_CSS: Record<string, string> = {
   text: '--mkly-text',
   muted: '--mkly-muted',
   border: '--mkly-border',
+  textAlign: '--mkly-text-align',
+  fontSize: '--mkly-font-size',
+  lineHeight: '--mkly-line-height',
   fontBody: '--mkly-font-body',
   fontHeading: '--mkly-font-heading',
   fontMono: '--mkly-font-mono',
@@ -52,6 +55,7 @@ export const VARIABLE_TO_CSS: Record<string, string> = {
   spacing: '--mkly-spacing',
   bgSubtle: '--mkly-bg-subtle',
   gapScale: '--mkly-gap-scale',
+  lineHeightScale: '--mkly-line-height-scale',
 };
 
 export function resolveVariableName(key: string): string {
@@ -65,6 +69,9 @@ export const STYLE_VARIABLES: StyleVariable[] = [
   { name: 'text', cssVar: '--mkly-text', description: 'Main text color' },
   { name: 'muted', cssVar: '--mkly-muted', description: 'Muted/secondary text color' },
   { name: 'border', cssVar: '--mkly-border', description: 'Border color' },
+  { name: 'textAlign', cssVar: '--mkly-text-align', description: 'Global text alignment' },
+  { name: 'fontSize', cssVar: '--mkly-font-size', description: 'Base font size for document text' },
+  { name: 'lineHeight', cssVar: '--mkly-line-height', description: 'Base line-height multiplier for body text' },
   { name: 'fontBody', cssVar: '--mkly-font-body', description: 'Body font family' },
   { name: 'fontHeading', cssVar: '--mkly-font-heading', description: 'Heading font family' },
   { name: 'fontMono', cssVar: '--mkly-font-mono', description: 'Monospace font family' },
@@ -72,6 +79,7 @@ export const STYLE_VARIABLES: StyleVariable[] = [
   { name: 'spacing', cssVar: '--mkly-spacing', description: 'Default spacing between blocks' },
   { name: 'bgSubtle', cssVar: '--mkly-bg-subtle', description: 'Subtle section background color' },
   { name: 'gapScale', cssVar: '--mkly-gap-scale', description: 'Scale multiplier for gaps between blocks (default 1)' },
+  { name: 'lineHeightScale', cssVar: '--mkly-line-height-scale', description: 'Scale multiplier for body text line-height (default 1)' },
 ];
 
 import { toKebab } from './utils';

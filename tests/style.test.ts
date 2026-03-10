@@ -407,7 +407,7 @@ text: Hello
     `);
     expect(result.html).toContain('--mkly-accent: #3b82f6;');
     expect(result.html).toContain('.mkly-heading {');
-    expect(result.html).toContain('letter-spacing: -1px;');
+    expect(result.html).toContain('letter-spacing: -0.0625rem;');
   });
 
   it('should apply theme config to output', () => {
@@ -415,7 +415,7 @@ text: Hello
       theme: { accent: '#ff0000', radius: '0px' },
     });
     expect(result.html).toContain('--mkly-accent: #ff0000;');
-    expect(result.html).toContain('--mkly-radius: 0px;');
+    expect(result.html).toContain('--mkly-radius: 0;');
   });
 
   it('should apply style block overrides after theme config', () => {
@@ -554,7 +554,7 @@ level: 1
 text: Hello
     `, { kits: { core: CORE_KIT } });
     expect(result.html).toContain('.mkly-core-heading {');
-    expect(result.html).toContain('letter-spacing: -0.5px;');
+    expect(result.html).toContain('letter-spacing: -0.0313rem;');
   });
 });
 
@@ -737,10 +737,10 @@ level: 1
 text: Hello
       `, { kits: { core: CORE_KIT } });
       expect(result.html).toContain('.mkly-core-heading {');
-      expect(result.html).toContain('letter-spacing: -0.5px;');
+      expect(result.html).toContain('letter-spacing: -0.0313rem;');
       expect(result.html).toContain('.custom-highlight {');
       expect(result.html).toContain('background: yellow;');
-      expect(result.html).toContain('padding: 4px 8px;');
+      expect(result.html).toContain('padding: 0.25rem 0.5rem;');
     });
   });
 
@@ -804,4 +804,3 @@ text: Hello
     });
   });
 });
-

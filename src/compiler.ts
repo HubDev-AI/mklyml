@@ -39,11 +39,27 @@ export function compile(
     }
   }
 
-  // Bail if version is missing or invalid (mandatory field)
-  const hasVersionError = doc.errors.some(e =>
-    e.severity === 'error' && (e.message.includes('Missing required "version"') || e.message.includes('Invalid version')),
+  // Auto-detect kits from block type prefixes (e.g., core/heading → core kit)
+  const resolvedNames = new Set(resolvedKits.map(k => k.name));
+  for (const block of doc.blocks) {
+    const slashIdx = block.blockType.indexOf('/');
+    if (slashIdx > 0) {
+      const prefix = block.blockType.substring(0, slashIdx);
+      if (!resolvedNames.has(prefix)) {
+        const kit = availableKits[prefix];
+        if (kit) {
+          resolvedKits.push(kit);
+          resolvedNames.add(kit.name);
+        }
+      }
+    }
+  }
+
+  // Bail on invalid (non-numeric) version — but missing version is OK (defaults to 1)
+  const hasInvalidVersion = doc.errors.some(e =>
+    e.severity === 'error' && e.message.includes('Invalid version'),
   );
-  if (hasVersionError) {
+  if (hasInvalidVersion) {
     return { html: '', errors: doc.errors };
   }
 
@@ -287,13 +303,18 @@ export function compile(
 
   const extraCSS = [layeredCSS];
 
-  const usedKitNames = doc.uses.filter(name => availableKits[name]);
+  const usedKitNames = resolvedKits.map(k => k.name);
   const activeThemeNames = themeNames.filter(name =>
     allThemes.has(name) || allThemes.has(`inline/${name}`),
   );
   const activePresetNames = presetNames.filter(name =>
     allPresets.has(name) || allPresets.has(`inline/${name}`),
   );
+
+  // Ensure version is in meta for round-trip (reverse parser reads it from meta tags)
+  if (!transformedDoc.meta.version) {
+    transformedDoc.meta = { ...transformedDoc.meta, version: String(doc.version) };
+  }
 
   const html = wrapOutput
     ? wrapOutput(blocksHtml, transformedDoc.meta, ctx, maxWidth, usedKitNames)
@@ -400,7 +421,7 @@ function serializeInlineDefines(inlineThemes: MklyTheme[], inlinePresets: MklyPr
 
 function wrapWeb(content: string, extraCSS: string[], maxWidth: number, meta?: Record<string, string>, uses?: string[], themes?: string[], presets?: string[], sourceMap?: boolean, styleSources?: string[], inlineThemes?: MklyTheme[], inlinePresets?: MklyPreset[]): string {
   if (sourceMap) {
-    extraCSS = [...extraCSS, '[data-mkly-active]{outline:2px solid rgba(59,130,246,0.5);outline-offset:2px;transition:outline 0.15s}'];
+    extraCSS = [...extraCSS, '[data-mkly-active]{outline:0.125rem solid rgba(59,130,246,0.5);outline-offset:0.125rem;transition:outline 0.15s}'];
   }
   const styleTag = extraCSS.length > 0
     ? `<style>${extraCSS.join('\n')}</style>\n`

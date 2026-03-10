@@ -10,7 +10,7 @@ export interface VersionResult {
 
 export function resolveVersion(meta: Record<string, string>): VersionResult {
   const raw = meta.version;
-  if (!raw) return { version: MKLY_DEFAULT_VERSION, error: 'Missing required "version" in --- meta block. Add: version: 1' };
+  if (!raw) return { version: MKLY_DEFAULT_VERSION };
   const num = parseInt(raw, 10);
   if (isNaN(num)) return { version: MKLY_DEFAULT_VERSION, error: `Invalid version: "${raw}"` };
   return { version: num };

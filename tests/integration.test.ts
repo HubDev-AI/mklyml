@@ -106,8 +106,7 @@ describe('integration', () => {
 
     it('should handle empty input', () => {
       const result = mkly('');
-      expect(result.html).toBe('');
-      expect(result.errors.some(e => e.message.includes('Missing required'))).toBe(true);
+      expect(result.errors.filter(e => e.severity === 'error')).toHaveLength(0);
     });
 
     it('should return errors array', () => {
