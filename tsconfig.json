@@ -7,7 +7,12 @@
     "noEmit": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "types": ["bun-types"]
+    "types": ["bun-types"],
+    "baseUrl": ".",
+    "paths": {
+      "@mklyml/kits/newsletter": ["../mkly-kits/newsletter/src/index.ts"],
+      "@mklyml/kits/docs": ["../mkly-kits/docs/src/index.ts"]
+    }
   },
   "include": ["src/**/*.ts", "tests/**/*.ts"]
 }
