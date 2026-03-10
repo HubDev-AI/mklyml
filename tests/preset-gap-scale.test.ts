@@ -8,8 +8,8 @@
  */
 import { describe, test, expect } from 'bun:test';
 import { CORE_PRESETS } from '../src/presets';
-import { NEWSLETTER_PRESETS } from '../../mkly-kits/newsletter/src/presets';
-import { DOCS_PRESETS } from '../../mkly-kits/docs/src/presets';
+import { NEWSLETTER_PRESETS } from '@mklyml/kits/newsletter';
+import { DOCS_PRESETS } from '@mklyml/kits/docs';
 
 /** Parse a css field into block→properties map */
 function parseCssField(css: string): Map<string, Array<[string, string]>> {

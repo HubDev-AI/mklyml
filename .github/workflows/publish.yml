@@ -24,16 +24,8 @@ jobs:
           node-version: '20'
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Clone dependencies
-        run: |
-          git clone --depth 1 https://github.com/HubDev-AI/mklyml-kits.git ../mkly-kits
-
       - name: Install dependencies
-        run: |
-          cd ../mkly-kits && bun install --frozen-lockfile
-          cd ../mkly-kits/newsletter && bun install --frozen-lockfile
-          cd ../mkly-kits/docs && bun install --frozen-lockfile
-          cd $GITHUB_WORKSPACE && bun install --frozen-lockfile
+        run: bun install
 
       - name: Validate
         run: |
