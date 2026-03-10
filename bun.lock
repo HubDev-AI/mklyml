@@ -7,6 +7,7 @@
         "zod": "4.3.6",
       },
       "devDependencies": {
+        "@mklyml/kits": ">=0.1.0",
         "@types/bun": "latest",
         "tsup": "8.5.1",
         "typescript": "5.8.2",
@@ -73,6 +74,10 @@
     "@jridgewell/sourcemap-codec": ["@jridgewell/sourcemap-codec@1.5.5", "", {}, "sha512-cYQ9310grqxueWbl+WuIUIaiUaDcj7WOq5fVhEljNVgRfOUhY9fy2zTvfoqWsnebh8Sl70VScFbICvJnLKB0Og=="],
 
     "@jridgewell/trace-mapping": ["@jridgewell/trace-mapping@0.3.31", "", { "dependencies": { "@jridgewell/resolve-uri": "^3.1.0", "@jridgewell/sourcemap-codec": "^1.4.14" } }, "sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw=="],
+
+    "@mklyml/core": ["@mklyml/core@0.2.0", "", { "dependencies": { "zod": "4.3.6" } }, "sha512-e/xgC5X1j0+J7hGkST8hFDjV4kcBFEwdznHEk3HHY2YyCRk8DbIOt6wMo5RGgJ3yReRronLUprYb8CFU0GR8jg=="],
+
+    "@mklyml/kits": ["@mklyml/kits@0.2.0", "", { "dependencies": { "@mklyml/core": "^0.2.0", "zod": "^4.3.6" } }, "sha512-Fy+2RHoCKuKbpvHlzWBUQO1dSkZpE388bFqU3TWBN+0Lb0G+wahYIGJB5VCnpRF9y08bZliukKk7qhILEM5knw=="],
 
     "@rollup/rollup-android-arm-eabi": ["@rollup/rollup-android-arm-eabi@4.57.1", "", { "os": "android", "cpu": "arm" }, "sha512-A6ehUVSiSaaliTxai040ZpZ2zTevHYbvu/lDoeAteHI8QnaosIzm4qwtezfRg1jOYaUmnzLX1AOD6Z+UJjtifg=="],
 
